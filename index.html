@@ -3,73 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <title>Dino Runner - T-Rex Comel</title>
+    <title>Dino Runner - Versi Cantik & Lancar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { gelap:'#0f172a', dino:'#22c55e', dinoPerut:'#86efac', dinoGelap:'#15803d', tanah:'#78350f', rumput:'#15803d' }}}
+            theme: { 
+                extend: { 
+                    colors: { 
+                        latarLangit: '#a9d6f5',
+                        dinoBadan: '#22c55e',
+                        dinoPerut: '#86efac',
+                        dinoGelap: '#166534',
+                        tanahDasar: '#8b4513',
+                        garisRumput: '#15803d',
+                        halangBatang: '#78350f'
+                    } 
+                } 
+            }
         }
     </script>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-        html, body { height:100%; overflow:hidden; font-family:'Segoe UI', sans-serif; background:#020617; display:flex; align-items:center; justify-content:center; padding:0.5rem;}
-        #gameContainer { position:relative; width:100%; max-width:900px; height:min(70vh, 500px); border-radius:16px; overflow:hidden; box-shadow:0 12px 45px rgba(0,0,0,.5);}
-        #gameCanvas { display:block; width:100%; height:100%; background:linear-gradient(#a5d8ff, #e0f7ff); touch-action:none;}
-        #sentuhPerintang { position:absolute; inset:0; z-index:5; cursor:pointer; }
-        #paparanSkor { position:absolute; top:10px; left:10px; background:rgba(255,255,255,.94); padding:8px 16px; border-radius:10px; font-weight:bold; font-size:1.1rem; color:#0f172a; z-index:6; box-shadow:0 2px 10px rgba(0,0,0,.15);}
-        #paparanMasa { position:absolute; top:12px; right:12px; background:rgba(255,255,255,.94); padding:6px 14px; border-radius:10px; font-weight:bold; font-size:1rem; color:#0f172a; z-index:6; box-shadow:0 2px 10px rgba(0,0,0,.15);}
-        .skrin { position:absolute; inset:0; background:rgba(15,23,42,.9); display:flex; flex-direction:column; justify-content:center; align-items:center; color:white; padding:1.5rem; z-index:10;}
-        .sembunyi { display:none !important;}
-        .btn { border:none; padding:1rem 2.5rem; border-radius:14px; font-weight:bold; font-size:1.2rem; color:white; margin:.6rem; cursor:pointer; transition:transform .15s ease; width:min(95%,300px); box-shadow:0 6px 15px rgba(0,0,0,.3);}
-        .btn:active { transform:scale(.95);}
-        .btn-biru { background:#2563eb;}
-        .btn-kuning { background:#d97706;}
-        .btn-hijau { background:#16a34a;}
-        .input { padding:.9rem; border-radius:12px; border:none; width:min(95%,300px); font-size:1.1rem; color:#111; text-align:center; margin-bottom:1rem;}
-        .senarai { background:#1e293b; border-radius:14px; max-width:450px; width:95%; max-height:55vh; overflow:auto; margin-top:1rem;}
-        .tajuk { background:#0f172a; padding:1rem; text-align:center; font-weight:bold; font-size:1.4rem; border-radius:14px 14px 0 0;}
-        .baris { display:flex; justify-content:space-between; padding:.9rem 1.2rem; border-bottom:1px solid #334155;}
-        .g1{background:#b45309; color:#fff; font-weight:bold;}
-        .g2{background:#64748b; color:#fff; font-weight:bold;}
-        .g3{background:#713f12; color:#fff; font-weight:bold;}
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { 
+            height: 100%; overflow: hidden; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background-color: #0f172a; 
+            display: flex; align-items: center; justify-content: center; 
+            padding: .5rem;
+        }
+        #bungkusPermainan { 
+            position: relative; width: 100%; max-width: 900px; 
+            height: min(72vh, 520px); 
+            border-radius: 16px; overflow: hidden; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        #kanvas { 
+            display: block; width: 100%; height: 100%; 
+            background: linear-gradient(#a9d6f5, #e0f2fe); 
+            touch-action: none;
+        }
+        #lapisanSentuh { position: absolute; inset: 0; z-index: 5; cursor: pointer; }
+        
+        .paparan {
+            position: absolute; top: 12px; 
+            background: rgba(255,255,255,.95);
+            padding: 8px 18px; border-radius: 14px;
+            font-weight: bold; font-size: 1.1rem;
+            box-shadow: 0 3px 12px rgba(0,0,0,.1);
+            z-index: 6;
+        }
+        #paparanSkor { left: 12px; color: #1e293b; }
+        #paparanMasa { right: 12px; color: #1e293b; }
+
+        .skrinTindih {
+            position: absolute; inset: 0; 
+            background: rgba(15,23,42,.92);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            color: white; padding: 1.5rem;
+            z-index: 10;
+        }
+        .sembunyi { display: none !important; }
+        
+        .butang {
+            border: none; border-radius: 14px;
+            padding: 1rem 2.5rem; margin: .6rem auto;
+            font-weight: bold; font-size: 1.2rem;
+            width: min(96%, 320px);
+            cursor: pointer; transition: transform .15s ease;
+            box-shadow: 0 6px 16px rgba(0,0,0,.25);
+        }
+        .butang:active { transform: scale(.96); }
+        .bBiru { background: #2563eb; color: white; }
+        .bHijau { background: #16a34a; color: white; }
+        .bKuning { background: #d97706; color: white; }
+        .bKelabu { background: #475569; color: white; }
+
+        .inputNama {
+            padding: 1rem; border-radius: 12px; border: none;
+            width: min(96%, 320px); font-size: 1.1rem;
+            text-align: center; margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        .kotakSenarai {
+            background: #1e293b; border-radius: 14px;
+            width: min(96%, 450px); max-height: 55vh; overflow-y: auto; margin-top: 1rem;
+        }
+        .tajukSenarai {
+            background: #0f172a; padding: 1rem; text-align: center;
+            font-weight: bold; font-size: 1.3rem; border-radius: 14px 14px 0 0;
+        }
+        .barisRekod {
+            display: flex; justify-content: space-between;
+            padding: .9rem 1.4rem; border-bottom: 1px solid #334155;
+        }
+        .kedudukan1 { background: #b45309; font-weight: bold; }
+        .kedudukan2 { background: #64748b; font-weight: bold; }
+        .kedudukan3 { background: #78350f; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
-        <div id="paparanSkor">Skor: 0</div>
-        <div id="paparanMasa">Masa: 0s</div>
-        <div id="sentuhPerintang"></div>
+    <div id="bungkusPermainan">
+        <canvas id="kanvas"></canvas>
+        <div id="paparanSkor" class="paparan">Skor: 0</div>
+        <div id="paparanMasa" class="paparan">Masa: 0s</div>
+        <div id="lapisanSentuh"></div>
 
-        <div id="mulaSkrin" class="skrin">
-            <h1 class="text-4xl font-bold mb-3">🦖 Dino Runner</h1>
-            <p class="mb-2 text-lg">👆 Ketuh skrin mana-mana untuk lompat</p>
-            <p class="mb-6 text-slate-300">Mula perlahan & makin laju lama-kelamaan</p>
-            <button id="btnMula" class="btn btn-biru">▶️ MULAI PERMAINAN</button>
-            <button id="btnPapan" class="btn btn-kuning">🏆 Papan Skor</button>
+        <div id="skrinMula" class="skrinTindih">
+            <h1 class="text-4xl font-bold mb-2">🦖 Dino Runner</h1>
+            <p class="text-xl mb-1">👆 Ketuh skrin mana-mana untuk lompat</p>
+            <p class="text-slate-300 mb-6">✅ Mula PERLAHAN & makin laju sedikit demi sedikit</p>
+            <button id="mulaBtn" class="butang bBiru">▶️ MULAI PERMAINAN</button>
+            <button id="papanBtn" class="butang bKuning">🏆 Papan Skor</button>
         </div>
 
-        <div id="tamatSkrin" class="skrin sembunyi">
-            <h2 class="text-3xl font-bold mb-3 text-red-400">PERMAINAN TAMAT!</h2>
-            <p class="text-xl mb-1">Masa bertahan: <span id="tMasa">0</span> saat</p>
-            <p class="text-2xl font-bold mb-4">Skor: <span id="tSkor" class="text-yellow-300">0</span></p>
-            <input type="text" id="namaPemain" class="input" placeholder="Nama anda..." maxlength="16">
-            <button id="simpanBtn" class="btn btn-hijau">✅ Simpan Rekod</button>
-            <button id="ulangBtn" class="btn btn-biru">🔄 Main Semula</button>
-            <button id="rumahBtn" class="btn bg-slate-600">🏠 Laman Utama</button>
+        <div id="skrinTamat" class="skrinTindih sembunyi">
+            <h2 class="text-3xl font-bold text-red-400 mb-4">PERMAINAN TAMAT!</h2>
+            <p class="text-xl mb-2">Masa bertahan: <span id="nilaiMasa" class="font-bold text-lg">0</span> saat</p>
+            <p class="text-2xl font-bold mb-5">Skor: <span id="nilaiSkor" class="text-yellow-300">0</span></p>
+            
+            <input type="text" id="namaPemain" class="inputNama" placeholder="Nama anda..." maxlength="16">
+            <button id="simpanBtn" class="butang bHijau">✅ Simpan Rekod</button>
+            <button id="ulangBtn" class="butang bBiru">🔄 Main Semula</button>
+            <button id="rumahBtn" class="butang bKelabu">🏠 Laman Utama</button>
         </div>
 
-        <div id="papanSkrin" class="skrin sembunyi">
-            <div class="senarai">
-                <div class="tajuk">🏆 10 TERATAS</div>
-                <div id="senaraiIsi"></div>
+        <div id="skrinPapan" class="skrinTindih sembunyi">
+            <div class="kotakSenarai">
+                <div class="tajukSenarai">🏆 10 Rekod Teratas</div>
+                <div id="isiSenarai"></div>
             </div>
-            <button id="kembaliMula" class="btn btn-biru mt-4">⬅️ Kembali</button>
+            <button id="kembaliBtn" class="butang bBiru mt-4">⬅ Kembali Main</button>
         </div>
     </div>
 
@@ -77,360 +145,346 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <script>
+    // Firebase
     const firebaseConfig = {
       apiKey: "AlzaSyDQ_MoqFHsVIpfq8YefgToN1S9j-p8mRv0",
       authDomain: "dino-runner-scores.firebaseapp.com",
       databaseURL: "https://dino-runner-scores-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "dino-runner-scores",
-      storageBucket: "dino-runner-scores.firebasestorage.app",
-      messagingSenderId: "245416612085",
-      appId: "1:245416612085:web:ebc76f43b983c9072fb5bc"
+      storageBucket: "dino-runner-scores.firebasestorage.app"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const skorRef = db.ref("skor");
-    let pendengar = null;
+    const rujukanSkor = db.ref("skor");
+    let pemantauData = null;
 
-    // BUNYI RINGKAS SAHAJA
+    // --- BUNYI MUDAH ---
     const Bunyi = {
-        lompat() { try { const a=new (AudioContext||webkitAudioContext)(); const o=a.createOscillator(),g=a.createGain();o.type="triangle";o.frequency.setValueAtTime(400,a.currentTime);o.frequency.exponentialRampToValueAtTime(750,a.currentTime+.12);g.gain.value=.1;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.15);}catch(e){}},
-        hentam() { try { const a=new (AudioContext||webkitAudioContext)(); const o=a.createOscillator(),g=a.createGain();o.type="sawtooth";o.frequency.setValueAtTime(180,a.currentTime);g.gain.value=.12;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.25);}catch(e){}}
+        lompat() { try { let ctx = new (AudioContext||webkitAudioContext)(); let o=ctx.createOscillator(),g=ctx.createGain();o.type="triangle";o.frequency.setValueAtTime(380,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(600,ctx.currentTime+.12);g.gain.value=.1;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.16);}catch(e){}},
+        hentam() { try { let ctx = new (AudioContext||webkitAudioContext)(); let o=ctx.createOscillator(),g=ctx.createGain();o.type="sawtooth";o.frequency.setValueAtTime(160,ctx.currentTime);g.gain.value=.13;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.25);}catch(e){}}
     };
 
-    const c = document.getElementById("gameCanvas"), ctx = c.getContext("2d");
-    const bekas = document.getElementById("gameContainer");
-    const paparanSkor = document.getElementById("paparanSkor");
-    const paparanMasa = document.getElementById("paparanMasa");
-    const sentuhEl = document.getElementById("sentuhPerintang");
-    const skrinMula = document.getElementById("mulaSkrin"), skrinTamat = document.getElementById("tamatSkrin"), skrinPapan = document.getElementById("papanSkrin");
-    const senaraiIsi = document.getElementById("senaraiIsi");
+    // --- PERKARA UTAMA ---
+    const kanv = document.getElementById("kanvas"), k = kanv.getContext("2d");
+    const bungkus = document.getElementById("bungkusPermainan");
+    const elSkor = document.getElementById("paparanSkor");
+    const elMasa = document.getElementById("paparanMasa");
+    const sentuhKawasan = document.getElementById("lapisanSentuh");
+    
+    let sedangMain = false;
+    let masaMulaPermainan = 0;
+    let masaTerakhir = 0;
+    let jumlahSkor = 0;
+    let kelajuanDasar = 3.0; // ✅ LEBIH PERLAHAN DARI MULA
+    let kelajuanSemasa = kelajuanDasar;
+    let pecutan = 0.0015; // ✅ PECUTAN LEMBUT
+    let kelajuanMaks = 9;
+    let parasTanah = 0;
+    
+    // Objek Dino
+    let dino = {
+        x: 50, lebar: 46, tinggi: 48, y:0,
+        kelajuanLompat: 0, dayaTarik: 1.15,
+        diTanah: true
+    };
+    
+    let senaraiHalangan = [];
+    let masaHalanganSeterusnya = 0;
 
-    let main = false, masaMula = 0, skor = 0;
-    let kelajuanAsas = 4.5, kelajuan = kelajuanAsas, tanahY = 0, skala = 1;
-    let dino = {x:55,y:0,w:44,h:46,lajuLompat:0,diTanah:true};
-    let halangan = [], masaHalang = 0;
+    // Saiz Kanvas
+    let saizSemula = () => {
+        let w = bungkus.clientWidth, h = bungkus.clientHeight;
+        kanv.width = w; kanv.height = h;
+        parasTanah = h - 55;
+        dino.y = parasTanah - dino.tinggi;
+    };
+    window.addEventListener("resize", saizSemula);
 
-    function saizKanvas() {
-        const w = bekas.clientWidth, h = bekas.clientHeight;
-        skala = window.devicePixelRatio || 1;
-        c.width = w * skala; c.height = h * skala;
-        ctx.setTransform(1,0,0,1,0,0); ctx.scale(skala,skala);
-        tanahY = h - 55; dino.y = tanahY - dino.h;
-    }
-    window.addEventListener("resize", saizKanvas);
+    // 🔷 LUKIS DINO YANG CANTIK, TEGAK SEPERTI GAMBAK DEPAN
+    let lukisDinoCantik = () => {
+        k.save();
+        k.translate(dino.x, dino.y);
 
-    // 🦖 DINO T-REX BERDIRI TEGAK, COMEL, TIDAK MERANGKAK
-    function lukisDino() {
-        ctx.save();
-        ctx.translate(dino.x, dino.y);
-
-        // Badan tegap, tidak meregang ke hadapan
-        ctx.fillStyle = "#22c55e";
-        ctx.beginPath();
-        ctx.roundRect(8, 16, 30, 26, 10);
-        ctx.fill();
+        // Badan utama
+        k.fillStyle = "#22c55e";
+        k.beginPath();
+        k.roundRect(10, 18, 28, 24, 7);
+        k.fill();
 
         // Perut cerah
-        ctx.fillStyle = "#86efac";
-        ctx.beginPath();
-        ctx.roundRect(12, 22, 22, 16, 7);
-        ctx.fill();
+        k.fillStyle = "#86efac";
+        k.beginPath();
+        k.roundRect(14, 24, 20, 14, 6);
+        k.fill();
 
-        // Kepala T-Rex besar, kedudukan tinggi
-        ctx.fillStyle = "#22c55e";
-        ctx.beginPath();
-        ctx.arc(36, 18, 14, 0, Math.PI * 2);
-        ctx.fill();
+        // Kepala besar & tegak
+        k.fillStyle = "#22c55e";
+        k.beginPath();
+        k.arc(36, 18, 14, 0, Math.PI*2);
+        k.fill();
 
-        // Mata besar
-        ctx.fillStyle = "#fff";
-        ctx.beginPath();
-        ctx.arc(40, 13, 6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "#000";
-        ctx.beginPath();
-        ctx.arc(42, 14, 3, 0, Math.PI * 2);
-        ctx.fill();
+        // Mata
+        k.fillStyle = "#fff";
+        k.beginPath(); k.arc(41, 13, 6, 0, Math.PI*2); k.fill();
+        k.fillStyle = "#000";
+        k.beginPath(); k.arc(43, 14, 3, 0, Math.PI*2); k.fill();
 
-        // Mulut comel
-        ctx.fillStyle = "#15803d";
-        ctx.fillRect(44, 22, 6, 2);
+        // Mulut
+        k.fillStyle = "#15803d";
+        k.fillRect(45, 22, 5, 2);
 
-        // Duri belakang
-        ctx.fillStyle = "#15803d";
-        ctx.beginPath();
-        ctx.moveTo(14, 14); ctx.lineTo(19, 4); ctx.lineTo(24, 14); ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(22, 13); ctx.lineTo(28, 2); ctx.lineTo(34, 13); ctx.fill();
+        // Duri cantik belakang
+        k.fillStyle = "#15803d";
+        k.beginPath(); k.moveTo(14,16);k.lineTo(19,6);k.lineTo(24,16);k.fill();
+        k.beginPath(); k.moveTo(24,15);k.lineTo(30,3);k.lineTo(35,15);k.fill();
 
-        // Lengan kecil T-Rex
-        ctx.fillStyle = "#22c55e";
-        ctx.fillRect(28, 24, 6, 10);
+        // Tangan pendek T-Rex
+        k.fillRect(28, 26, 5, 9);
 
-        // Kaki pendek, tegak
-        ctx.fillStyle = "#166534";
-        ctx.fillRect(12, 38, 7, 10);
-        ctx.fillRect(28, 38, 7, 10);
+        // Kaki tegap & cantik
+        k.fillStyle = "#166534";
+        k.fillRect(12, 39, 7, 10);
+        k.fillRect(27, 39, 7, 10);
 
         // Ekor
-        ctx.fillStyle = "#22c55e";
-        ctx.beginPath();
-        ctx.ellipse(6, 28, 10, 7, -0.6, 0, Math.PI * 2);
-        ctx.fill();
+        k.fillStyle = "#22c55e";
+        k.beginPath();
+        k.ellipse(6, 30, 9, 6, -0.55, 0, Math.PI*2);
+        k.fill();
 
-        ctx.restore();
-    }
+        k.restore();
+    };
 
-    // 🌳 HALANGAN: SEMUA DUDUK TEPAT DI TANAH
-    function lukisHalang(h) {
-        ctx.save();
-        ctx.translate(h.x, h.y);
+    // Latar belakang & tanah
+    let lukisLatar = () => {
+        let w = kanv.width, h = kanv.height;
+        // Langit sudah ditetapkan dalam CSS
+        
+        // Garis rumput
+        k.fillStyle = "#15803d";
+        k.fillRect(0, parasTanah, w, 10);
+        
+        // Tanah bawah
+        k.fillStyle = "#78350f";
+        k.fillRect(0, parasTanah+10, w, h - parasTanah - 10);
+    };
 
-        if (h.jenis === "pokok") {
-            // Pokok: batang panjang sampai ke tanah
-            ctx.fillStyle = "#78350f";
-            ctx.fillRect((h.w / 2) - 5, 0, 10, h.h * 0.55);
+    // Halangan & Pokok TIDAK terapung
+    let lukisHalangan = (h) => {
+        k.save();
+        k.translate(h.x, h.y);
 
-            // Daun bulat seimbang
-            ctx.fillStyle = "#15803d";
-            ctx.beginPath();
-            ctx.arc(h.w / 2, -10, h.w / 2, 0, Math.PI * 2);
-            ctx.fill();
+        if(h.jenis === "pokok"){
+            // Batang panjang sampai ke tanah
+            k.fillStyle = halangBatang;
+            k.fillRect((h.w/2)-4, 0, 9, h.h * 0.6);
+            // Hujung/Daun
+            k.fillStyle = "#15803d";
+            k.beginPath(); k.arc(h.w/2, -6, h.w/2 - 2, 0, Math.PI*2); k.fill();
+        }
+        if(h.jenis === "kaktus"){
+            k.fillStyle = "#15803d";
+            k.fillRect(12, 0, 12, h.h);
+            k.fillRect(0, h.h*.25, 12, 8);
+            k.fillRect(0, h.h*.15, 6, 18);
+            k.fillRect(24, h.h*.35, 12, 8);
+            k.fillRect(30, h.h*.22, 6, 18);
+        }
+        if(h.jenis === "pagar"){
+            k.fillStyle = halangBatang;
+            k.fillRect(2,0,4,h.h);
+            k.fillRect(h.w-6,0,4,h.h);
+            k.fillRect(0,h.h*.4,h.w,5);
+            k.fillRect(0,h.h*.65,h.w,5);
         }
 
-        if (h.jenis === "kaktus") {
-            ctx.fillStyle = "#15803d";
+        k.restore();
+    };
 
-            // Batang tengah
-            ctx.fillRect(12, 0, 14, h.h);
-
-            // Lengan kiri
-            ctx.fillRect(0, h.h * 0.22, 14, 10);
-            ctx.fillRect(0, h.h * 0.12, 8, 20);
-
-            // Lengan kanan
-            ctx.fillRect(24, h.h * 0.35, 14, 10);
-            ctx.fillRect(30, h.h * 0.22, 8, 20);
-        }
-
-        if (h.jenis === "pagar") {
-            ctx.fillStyle = "#713f12";
-            ctx.fillRect(3, 0, 5, h.h);
-            ctx.fillRect(h.w - 8, 0, 5, h.h);
-            ctx.fillRect(0, h.h * 0.35, h.w, 5);
-            ctx.fillRect(0, h.h * 0.6, h.w, 5);
-        }
-
-        ctx.restore();
-    }
-
-    function latar() {
-        const w = bekas.clientWidth, h = bekas.clientHeight;
-        ctx.fillStyle = "#a5d8ff";
-        ctx.fillRect(0, 0, w, h);
-
-        ctx.fillStyle = "#15803d";
-        ctx.fillRect(0, tanahY, w, 10);
-
-        ctx.fillStyle = "#78350f";
-        ctx.fillRect(0, tanahY + 10, w, h - tanahY - 10);
-    }
-
-    function buatHalangan() {
-        const jenis = ["pokok", "kaktus", "pagar"][Math.floor(Math.random() * 3)];
-
-        const ukuran = {
-            pokok: { w: 38, h: 54 },
-            kaktus: { w: 38, h: 50 },
-            pagar: { w: 36, h: 46 }
+    let buatHalanganBaru = () => {
+        let jenis = ["pokok", "kaktus", "pagar"][Math.floor(Math.random()*3)];
+        let ukuran = {
+            pokok: {l:36,t:52},
+            kaktus:{l:36,t:50},
+            pagar:{l:36,t:46}
         }[jenis];
 
-        halangan.push({
-            x: bekas.clientWidth + 20,
-            y: tanahY - ukuran.h,
-            w: ukuran.w,
-            h: ukuran.h,
+        senaraiHalangan.push({
+            x: kanv.width + 20,
+            y: parasTanah - ukuran.t,
+            w: ukuran.l, h: ukuran.t,
             jenis: jenis
         });
-    }
+    };
 
-    function lompat() {
-        if (dino.diTanah && main) {
-            dino.lajuLompat = -15;
+    let lompat = () => {
+        if(dino.diTanah && sedangMain){
+            dino.kelajuanLompat = -14.5;
             dino.diTanah = false;
             Bunyi.lompat();
         }
-    }
+    };
 
-    function gelungUtama(masa) {
-        if (!main) return;
+    // --- LINGKARAN UTAMA & PEMBAIKAN MASA ---
+    let lingkaran = (masaSemasa) => {
+        if(!sedangMain) return;
 
-        const delta = Math.min((masa - masaMula) / 16, 2.5);
+        // ✅ PEMBAIKAN UTAMA MASA & KELAJUAN
+        let masaLalu = masaSemasa - masaTerakhir;
+        masaTerakhir = masaSemasa;
 
-        kelajuan = kelajuanAsas + (skor / 250);
-        if (kelajuan > 11) kelajuan = 11;
+        // Kelajuan bertambah perlahan
+        kelajuanSemasa += pecutan;
+        if(kelajuanSemasa > kelajuanMaks) kelajuanSemasa = kelajuanMaks;
 
-        skor += Math.round(delta);
-        paparanSkor.textContent = `Skor: ${skor}`;
+        // Skor & ✅ MASA BERJALAN BETUL
+        jumlahSkor += Math.round(masaLalu / 16);
+        elSkor.textContent = `Skor: ${jumlahSkor}`;
+        
+        let saat = Math.floor((masaSemasa - masaMulaPermainan)/1000);
+        elMasa.textContent = `Masa: ${saat}s`;
 
-        // Paparan masa kembali
-        let masaKini = Math.floor((masa - masaMula) / 1000);
-        paparanMasa.textContent = `Masa: ${masaKini}s`;
-
-        if (!dino.diTanah) {
-            dino.lajuLompat += 1.2 * delta;
-            dino.y += dino.lajuLompat * delta;
-
-            if (dino.y + dino.h >= tanahY) {
-                dino.y = tanahY - dino.h;
+        // Fizik Lompat
+        if(!dino.diTanah){
+            dino.y += dino.kelajuanLompat;
+            dino.kelajuanLompat += dino.dayaTarik;
+            
+            if(dino.y + dino.tinggi >= parasTanah){
+                dino.y = parasTanah - dino.tinggi;
                 dino.diTanah = true;
-                dino.lajuLompat = 0;
+                dino.kelajuanLompat = 0;
             }
         }
 
-        masaHalang += delta;
-        if (masaHalang > Math.max(55, 100 - kelajuan * 4)) {
-            buatHalangan();
-            masaHalang = 0;
+        // Jarak antara halangan
+        masaHalanganSeterusnya += masaLalu / 16;
+        let jarakMin = Math.max(65, 110 - kelajuanSemasa * 3.5);
+        if(masaHalanganSeterusnya > jarakMin){
+            buatHalanganBaru();
+            masaHalanganSeterusnya = 0;
         }
 
-        halangan = halangan.filter(h => {
-            h.x -= kelajuan * delta;
-            return h.x + h.w > -15;
+        // Gerakkan & bersihkan halangan lama
+        senaraiHalangan = senaraiHalangan.filter(h => {
+            h.x -= kelajuanSemasa * (masaLalu/16);
+            return h.x + h.w > -20;
         });
 
-        for (let h of halangan) {
-            let pelarasan = 8;
-            if (
-                dino.x + pelarasan < h.x + h.w - pelarasan &&
-                dino.x + dino.w - pelarasan > h.x + pelarasan &&
-                dino.y + dino.h - pelarasan > h.y
-            ) {
-                main = false;
+        // Perlanggaran
+        for(let h of senaraiHalangan){
+            let pengecilan = 9;
+            if(
+                dino.x + pengecilan < h.x + h.w - pengecilan &&
+                dino.x + dino.lebar - pengecilan > h.x + pengecilan &&
+                dino.y + dino.tinggi - pengecilan > h.y
+            ){
+                sedangMain = false;
                 Bunyi.hentam();
-                tamat();
+                tamatPermainan(masaSemasa);
                 return;
             }
         }
 
-        latar();
-        halangan.forEach(lukisHalang);
-        lukisDino();
+        k.clearRect(0,0,kanv.width,kanv.height);
+        lukisLatar();
+        senaraiHalangan.forEach(lukisHalangan);
+        lukisDinoCantik();
 
-        requestAnimationFrame(gelungUtama);
-    }
+        requestAnimationFrame(lingkaran);
+    };
 
-    function mula() {
-        skrinMula.classList.add("sembunyi");
-        skrinTamat.classList.add("sembunyi");
-        skrinPapan.classList.add("sembunyi");
+    let mulaPermainan = () => {
+        // Sembunyi semua
+        document.getElementById("skrinMula").classList.add("sembunyi");
+        document.getElementById("skrinTamat").classList.add("sembunyi");
+        document.getElementById("skrinPapan").classList.add("sembunyi");
 
-        saizKanvas();
-        main = true;
-        masaMula = performance.now();
-        skor = 0;
-        kelajuan = kelajuanAsas;
-        halangan = [];
-        masaHalang = 0;
+        saizSemula();
+        sedangMain = true;
+        jumlahSkor = 0;
+        kelajuanSemasa = kelajuanDasar; // Reset kelajuan perlahan
+        masaHalanganSeterusnya = 0;
+        senaraiHalangan = [];
+        
+        masaMulaPermainan = performance.now();
+        masaTerakhir = masaMulaPermainan;
 
-        dino.x = 50;
-        dino.y = tanahY - dino.h;
-        dino.diTanah = true;
-        paparanSkor.textContent = "Skor: 0";
-        paparanMasa.textContent = "Masa: 0s";
+        elSkor.textContent = "Skor: 0";
+        elMasa.textContent = "Masa: 0s";
+        dino.x = 50; dino.y = parasTanah - dino.tinggi; dino.diTanah = true;
 
-        requestAnimationFrame(gelungUtama);
-    }
+        requestAnimationFrame(lingkaran);
+    };
 
-    function tamat() {
-        let masaAkhir = Math.floor((performance.now() - masaMula) / 1000);
+    let tamatPermainan = (masa) => {
+        let masaAkhir = Math.floor((masa - masaMulaPermainan)/1000);
+        document.getElementById("nilaiSkor").textContent = jumlahSkor;
+        document.getElementById("nilaiMasa").textContent = masaAkhir;
+        document.getElementById("skrinTamat").classList.remove("sembunyi");
+    };
 
-        document.getElementById("tSkor").textContent = skor;
-        document.getElementById("tMasa").textContent = masaAkhir;
-        skrinTamat.classList.remove("sembunyi");
-    }
-
-    async function simpan() {
-        const nama = document.getElementById("namaPemain").value.trim() || "Anonim";
-        const masaAkhir = Math.floor((performance.now() - masaMula) / 1000);
-
-        await skorRef.push({
-            nama: nama,
-            skor: skor,
-            masa: masaAkhir,
+    let simpanRekod = async () => {
+        let nama = document.getElementById("namaPemain").value.trim() || "Anonim";
+        let masaAkhir = Math.floor((performance.now() - masaMulaPermainan)/1000);
+        
+        await rujukanSkor.push({
+            nama: nama, skor: jumlahSkor, masa: masaAkhir,
             tarikh: new Date().toISOString()
         });
-
         alert("✅ Disimpan!");
-        lihatPapan();
-    }
+        paparkanPapan();
+    };
 
-    function lihatPapan() {
-        skrinMula.classList.add("sembunyi");
-        skrinTamat.classList.add("sembunyi");
-        skrinPapan.classList.remove("sembunyi");
-
-        if (pendengar) skorRef.off("value", pendengar);
-
-        pendengar = skorRef.orderByChild("skor").limitToLast(10).on("value", snap => {
-            senaraiIsi.innerHTML = "";
-
-            if (!snap.exists()) {
-                senaraiIsi.innerHTML = "<p class='p-5 text-center'>Belum ada rekod</p>";
-                return;
-            }
-
-            let data = Object.values(snap.val()).sort((a, b) => b.skor - a.skor);
-
-            data.forEach((p, i) => {
-                const el = document.createElement("div");
-                el.className = `baris g${i + 1 <= 3 ? i + 1 : ""}`;
-                el.innerHTML = `<span>${i + 1}. ${p.nama}</span><span>${p.skor} | ${p.masa || 0}s</span>`;
-                senaraiIsi.appendChild(el);
+    let paparkanPapan = () => {
+        ["skrinMula", "skrinTamat"].map(id=>document.getElementById(id).classList.add("sembunyi"));
+        document.getElementById("skrinPapan").classList.remove("sembunyi");
+        
+        if(pemantauData) rujukanSkor.off("value", pemantauData);
+        pemantauData = rujukanSkor.orderByChild("skor").limitToLast(10).on("value", data => {
+            let bekas = document.getElementById("isiSenarai"); bekas.innerHTML="";
+            if(!data.exists()){ bekas.innerHTML="<p class='p-5 text-center'>Tiada rekod</p>"; return; }
+            
+            let senarai = Object.values(data.val()).sort((a,b)=>b.skor - a.skor);
+            senarai.forEach((item, i)=>{
+                let baris = document.createElement("div");
+                baris.className = `barisRekod ${{0:'kedudukan1',1:'kedudukan2',2:'kedudukan3'}[i]||''}`;
+                baris.innerHTML = `<span>${i+1}. ${item.nama}</span><span>${item.skor} | ${item.masa||0}s</span>`;
+                bekas.appendChild(baris);
             });
         });
-    }
+    };
+    
+    let kembaliLaman = () => {
+        document.getElementById("skrinPapan").classList.add("sembunyi");
+        document.getElementById("skrinMula").classList.remove("sembunyi");
+        if(pemantauData){ rujukanSkor.off("value", pemantauData); pemantauData=null; }
+    };
 
-    function tutupPapan() {
-        skrinPapan.classList.add("sembunyi");
-        skrinMula.classList.remove("sembunyi");
+    // Kawalan Sentuh & Papan Kekunci
+    let ikatPeristiwa = () => {
+        let tekan = e => { e.preventDefault(); if(sedangMain) lompat(); };
+        sentuhKawasan.addEventListener("touchstart", tekan, {passive:false});
+        sentuhKawasan.addEventListener("mousedown", tekan);
+        kanv.addEventListener("touchstart", tekan, {passive:false});
 
-        if (pendengar) {
-            skorRef.off("value", pendengar);
-            pendengar = null;
-        }
-    }
-
-    function ikatKawalan() {
-        const tekan = (e) => {
-            e?.preventDefault?.();
-            if (main) lompat();
-        };
-
-        sentuhEl.addEventListener("touchstart", tekan, { passive: false });
-        sentuhEl.addEventListener("mousedown", tekan);
-        c.addEventListener("touchstart", tekan, { passive: false });
-
-        document.addEventListener("keydown", e => {
-            if (e.code === "Space" || e.code === "ArrowUp") {
-                e.preventDefault();
-                lompat();
-            }
+        document.addEventListener("keydown", (e)=>{
+            if(e.code === "Space" || e.code === "ArrowUp"){ e.preventDefault(); lompat(); }
         });
-    }
+    };
 
-    document.getElementById("btnMula").onclick = mula;
-    document.getElementById("ulangBtn").onclick = mula;
-    document.getElementById("simpanBtn").onclick = simpan;
-    document.getElementById("btnPapan").onclick = lihatPapan;
-    document.getElementById("rumahBtn").onclick = tutupPapan;
-    document.getElementById("kembaliMula").onclick = tutupPapan;
+    // Butang
+    document.getElementById("mulaBtn").onclick = mulaPermainan;
+    document.getElementById("ulangBtn").onclick = mulaPermainan;
+    document.getElementById("simpanBtn").onclick = simpanRekod;
+    document.getElementById("papanBtn").onclick = paparkanPapan;
+    document.getElementById("rumahBtn").onclick = kembaliLaman;
+    document.getElementById("kembaliBtn").onclick = kembaliLaman;
 
-    saizKanvas();
-    ikatKawalan();
-    latar();
-    lukisDino();
+    // Mula sedia
+    saizSemula();
+    ikatPeristiwa();
+    lukisLatar();
+    lukisDinoCantik();
     </script>
 </body>
 </html>
