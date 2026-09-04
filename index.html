@@ -1,288 +1,473 @@
-<!DOCTYPE html>
-<html lang="ms">
+<html style="margin:0;padding:0;">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Cache-Control" content="no-cache">
-    <title>Dino Runner - Stabil & Cantik</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0f172a;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; padding: 10px;
-        }
-        #gameWrap {
-            width: 100%; max-width: 500px;
-            height: 70vh; min-height: 400px;
-            border-radius: 16px; overflow: hidden;
-            position: relative;
-            box-shadow: 0 8px 32px rgba(0,0,0,.5);
-        }
-        #gameCanvas {
-            background: #bbdefb;
-            width: 100%; height: 100%;
-            display: block;
-        }
-        #touchArea {
-            position: absolute; inset: 0;
-            z-index: 10; cursor: pointer;
-        }
-        .hud {
-            position: absolute; top: 10px;
-            background: rgba(255,255,255,.9);
-            padding: 8px 16px; border-radius: 12px;
-            font-weight: bold; font-size: 1.1rem;
-            z-index: 20;
-        }
-        #scoreHud { left: 10px; }
-        #timeHud { right: 10px; }
-
-        .screen {
-            position: absolute; inset: 0;
-            background: rgba(15,23,42,.92);
-            z-index: 30;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            color: white; padding: 20px;
-        }
-        .hide { display: none !important; }
-
-        button {
-            border: none; border-radius: 12px;
-            padding: 14px 32px; margin: 8px auto;
-            font-size: 1.2rem; font-weight: bold;
-            width: 90%; max-width: 300px;
-            cursor: pointer;
-        }
-        .btn-blue { background: #2563eb; color:white; }
-        .btn-green { background: #16a34a; color:white; }
-        .btn-orange { background: #d97706; color:white; }
-        input {
-            padding: 12px; width: 90%; max-width:300px;
-            border-radius: 10px; border:none;
-            text-align:center; font-size:1.1rem; margin-bottom:15px;
-        }
-    </style>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 </head>
-<body>
-<div id="gameWrap">
-    <canvas id="gameCanvas"></canvas>
-    <div id="scoreHud" class="hud">Skor: 0</div>
-    <div id="timeHud" class="hud">Masa: 0s</div>
-    <div id="touchArea"></div>
-
-    <div id="startScreen" class="screen">
-        <h1 class="text-3xl font-bold mb-4">🦖 DINO RUNNER</h1>
-        <p class="mb-2">👆 Ketuh skrin / Tekan Ruang untuk lompat</p>
-        <p class="mb-6 text-slate-300">Kelajuan bertambah perlahan</p>
-        <button id="startBtn" class="btn-blue">▶️ MULA</button>
+<body style="background:linear-gradient(to bottom,#87CEEB 0%,#faf9f4 100%);min-height:100%;padding:8px;box-sizing:border-box;font-family:'Fredoka',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0;">
+  <div style="width:100%;max-width:900px;">
+    <h1 style="text-align:center;font-size:18px;font-weight:700;color:#0f172a;margin:0 0 8px 0;text-shadow:1px 1px 0 #fff;">Dino Runner - Lompat Halangan</h1>
+    
+    <div id="gameWrap" style="position:relative;border:3px solid #0f172a;border-radius:14px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,0.2);background:#faf9f4;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;width:100%;aspect-ratio:800/360;max-height:85vh;">
+      <canvas id="gameCanvas" style="display:block;width:100%;height:100%;touch-action:manipulation;cursor:pointer;"></canvas>
+      
+      <div id="scorePanel" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.95);padding:4px 10px;border-radius:6px;font-size:13px;font-weight:600;color:#0f172a;border:2px solid rgba(15,23,42,0.2);font-variant-numeric:tabular-nums;z-index:10;">Masa: 0s | Skor: 0</div>
+      
+      <div id="startPanel" style="position:absolute;inset:0;background:rgba(15,23,42,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:16px;z-index:20;">
+        <div style="font-size:clamp(20px,5vw,32px);font-weight:700;margin-bottom:8px;">DINO RUNNER</div>
+        <div style="font-size:clamp(11px,2.5vw,15px);opacity:0.9;margin-bottom:14px;line-height:1.5;">Ketuh skrin untuk lompat!<br>Elak kaktus, pagar & batu</div>
+        
+        <div style="width:100%;max-width:240px;margin-bottom:12px;text-align:left;">
+          <label style="font-size:clamp(11px,2.2vw,14px);opacity:0.85;">Nama anda:</label>
+          <input type="text" id="playerName" placeholder="Masukkan nama..." maxlength="12" style="width:100%;padding:8px 10px;font-size:clamp(12px,2.5vw,16px);border-radius:8px;border:none;outline:none;color:#0f172a;margin-top:4px;font-family:'Fredoka',sans-serif;box-sizing:border-box;">
+        </div>
+        
+        <button id="startBtn" style="background:#297a2e;color:#fff;border:none;padding:12px 32px;font-size:clamp(14px,3vw,20px);font-weight:700;border-radius:12px;cursor:pointer;font-family:'Fredoka',sans-serif;box-shadow:0 4px 0 #1a5220;touch-action:manipulation;min-width:160px;">MULA</button>
+        
+        <button id="leaderBtn" style="background:#4f46e5;color:#fff;border:none;padding:8px 20px;font-size:clamp(11px,2.2vw,15px);font-weight:600;border-radius:10px;cursor:pointer;font-family:'Fredoka',sans-serif;box-shadow:0 3px 0 #3730a3;margin-top:10px;touch-action:manipulation;">PAPAN KETUA</button>
+      </div>
+      
+      <div id="overPanel" style="position:absolute;inset:0;background:rgba(15,23,42,0.88);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:16px;z-index:20;overflow-y:auto;">
+        <div style="font-size:clamp(18px,4.5vw,28px);font-weight:700;margin-bottom:8px;">HABIS GAME!</div>
+        <div id="finalInfo" style="font-size:clamp(12px,2.8vw,18px);margin-bottom:10px;line-height:1.6;"></div>
+        <div id="newRecord" style="color:#facc15;font-size:clamp(12px,2.8vw,18px);font-weight:700;margin-bottom:10px;display:none;">SKOR BARU MASUK 10 TERATAS!</div>
+        <button id="submitScoreBtn" style="background:#facc15;color:#0f172a;border:none;padding:8px 22px;font-size:clamp(11px,2.5vw,16px);font-weight:700;border-radius:10px;cursor:pointer;font-family:'Fredoka',sans-serif;margin-bottom:10px;display:none;">HANTAR SKOR</button>
+        <button id="againBtn" style="background:#d97706;color:#fff;border:none;padding:12px 32px;font-size:clamp(14px,3vw,20px);font-weight:700;border-radius:12px;cursor:pointer;font-family:'Fredoka',sans-serif;box-shadow:0 4px 0 #92400e;touch-action:manipulation;min-width:160px;">MAIN SEMULA</button>
+        <button id="toLeaderBtn" style="background:#4f46e5;color:#fff;border:none;padding:8px 20px;font-size:clamp(11px,2.2vw,15px);font-weight:600;border-radius:10px;cursor:pointer;font-family:'Fredoka',sans-serif;box-shadow:0 3px 0 #3730a3;margin-top:10px;">PAPAN KETUA</button>
+      </div>
+      
+      <div id="leaderPanel" style="position:absolute;inset:0;background:rgba(15,23,42,0.92);display:none;flex-direction:column;align-items:center;justify-content:flex-start;color:#fff;text-align:center;padding:16px;z-index:20;overflow-y:auto;">
+        <div style="font-size:clamp(18px,4.5vw,28px);font-weight:700;margin-bottom:12px;">10 TERATAS</div>
+        <div id="leaderList" style="width:100%;max-width:300px;background:rgba(255,255,255,0.1);border-radius:12px;padding:10px;margin-bottom:10px;font-size:clamp(11px,2.5vw,14px);"></div>
+        
+        <!-- BAHAGIAN BARU: Eksport / Import -->
+        <div style="width:100%;max-width:300px;margin-bottom:10px;">
+          <button id="exportBtn" style="width:100%;background:#10b981;color:white;border:none;padding:8px;border-radius:8px;margin-bottom:6px;font-family:'Fredoka',sans-serif;">📤 Eksport Kod Skor</button>
+          <button id="importToggleBtn" style="width:100%;background:#6366f1;color:white;border:none;padding:8px;border-radius:8px;font-family:'Fredoka',sans-serif;">📥 Masukkan Kod Skor</button>
+          <textarea id="importData" placeholder="Tampalkan kod skor di sini..." style="width:100%;margin-top:8px;padding:8px;border-radius:8px;border:none;min-height:70px;display:none;color:#111;font-size:12px;box-sizing:border-box;"></textarea>
+          <button id="confirmImportBtn" style="width:100%;margin-top:6px;background:#e11d48;color:white;border:none;padding:8px;border-radius:8px;display:none;font-family:'Fredoka',sans-serif;">✅ Guna Data Ini</button>
+          <div id="exportNotice" style="font-size:11px;opacity:0.8;margin-top:6px;display:none;">✅ Kod disalin! Tampal & simpan di nota/hantar ke peranti lain.</div>
+        </div>
+        
+        <button id="closeLeaderBtn" style="background:#64748b;color:#fff;border:none;padding:10px 28px;font-size:clamp(12px,2.5vw,17px);font-weight:600;border-radius:10px;cursor:pointer;font-family:'Fredoka',sans-serif;">KEMBALI</button>
+      </div>
     </div>
-
-    <div id="overScreen" class="screen hide">
-        <h2 class="text-2xl font-bold text-red-400 mb-4">TAMAT!</h2>
-        <p class="text-xl mb-1">Masa: <span id="resTime">0</span> s</p>
-        <p class="text-xl mb-4">Skor: <span id="resScore">0</span></p>
-        <input type="text" id="playerName" placeholder="Nama anda...">
-        <button id="saveBtn" class="btn-green">✅ Simpan</button>
-        <button id="restartBtn" class="btn-blue">🔄 Main Semula</button>
-    </div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    
+    <p style="text-align:center;font-size:11px;color:#64748b;margin-top:8px;">Ketuh mana-mana kawasan game untuk lompat</p>
+  </div>
 
 <script>
-const firebaseConfig = {
-    apiKey: "AlzaSyDQ_MoqFHsVIpfq8YefgToN1S9j-p8mRv0",
-    authDomain: "dino-runner-scores.firebaseapp.com",
-    databaseURL: "https://dino-runner-scores-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "dino-runner-scores"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// Unsur & Kanvas
-const c = document.getElementById('gameCanvas');
-const ctx = c.getContext('2d');
-const wrap = document.getElementById('gameWrap');
-const touch = document.getElementById('touchArea');
-
-// Pemboleh ubah Permainan - DIRESET DENGAN BETUL
-let running = false;
-let score = 0;
-let timeSec = 0;
-let lastTime = 0;
-let groundY = 0;
-let speed = 3.5;
-let obstacles = [];
-let animFrame = null;
-
-// Dino Mudah & Jelas - Sentiasa Kelihatan
-const dino = {
-    x: 50, w: 44, h: 48, y: 0,
-    vy: 0, jumpPower: -13, gravity: 0.65,
-    onGround: true
-};
-
-// Saiz & Latar
-function resize() {
-    c.width = wrap.clientWidth;
-    c.height = wrap.clientHeight;
-    groundY = c.height - 50;
-    dino.y = groundY - dino.h;
-}
-
-// Lukis Dino Rapi & Mudah
-function drawDino() {
-    ctx.fillStyle = "#22c55e";
-    ctx.fillRect(dino.x+8, dino.y+14, 28, 24); // Badan
-    ctx.beginPath(); ctx.arc(dino.x+32, dino.y+16, 13, 0, Math.PI*2); ctx.fill(); // Kepala
-    
-    ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(dino.x+38,dino.y+12,5,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle="#000"; ctx.beginPath(); ctx.arc(dino.x+39,dino.y+13,2,0,Math.PI*2); ctx.fill();
-    
-    ctx.fillStyle="#15803d";
-    ctx.fillRect(dino.x+10, dino.y+36, 6, 12); // Kaki
-    ctx.fillRect(dino.x+28, dino.y+36, 6, 12);
-}
-
-// Halangan & Tanah
-function drawBg() {
-    ctx.fillStyle="#bbdefb"; ctx.fillRect(0,0,c.width,c.height);
-    ctx.fillStyle="#8b4513"; ctx.fillRect(0,groundY,c.width,50);
-    ctx.fillStyle="#2e7d32"; ctx.fillRect(0,groundY,c.width,6);
-}
-
-function drawObstacles() {
-    obstacles.forEach(h => {
-        ctx.fillStyle="#5d4037";
-        if(h.type==="cactus") {
-            ctx.fillRect(h.x,h.y,h.w,h.h);
-            ctx.fillRect(h.x-h.w/2,h.y+h.h*0.2,h.w*1.5,h.h*0.2);
-        } else {
-            ctx.fillRect(h.x,h.y,h.w,h.h);
-        }
-    });
-}
-
-function spawnObstacle() {
-    const types = ["cactus", "cactus"];
-    let w = 22 + Math.random()*8;
-    let h = 38 + Math.random()*18;
-    obstacles.push({
-        x: c.width + 30,
-        y: groundY - h,
-        w: w, h: h,
-        type: types[Math.floor(Math.random()*types.length)]
-    });
-}
-
-// Lompat
-function jump() {
-    if(dino.onGround && running) {
-        dino.vy = dino.jumpPower;
-        dino.onGround = false;
-    }
-}
-
-// LINGKARAN UTAMA - TIDAK GANJIL BILA DIULANG
-function loop(timestamp) {
-    if(!running) return;
-
-    // ✅ Kiraan Masa & Skor SEIMBANG
-    let dt = timestamp - lastTime;
-    lastTime = timestamp;
-
-    // Kemas kini Masa & Skor berasingan
-    score += Math.round(dt / 50); // Skor perlahan & munasabah
-    timeSec = Math.floor(timestamp / 1000);
-
-    document.getElementById("scoreHud").textContent = "Skor: " + score;
-    document.getElementById("timeHud").textContent = "Masa: " + timeSec + "s";
-
-    // Kelajuan perlahan
-    speed += 0.002;
-
-    // Fizik Lompat
-    dino.vy += dino.gravity;
-    dino.y += dino.vy;
-    if(dino.y + dino.h >= groundY) {
-        dino.y = groundY - dino.h;
-        dino.vy = 0; dino.onGround = true;
-    }
-
-    // Halangan
-    obstacles = obstacles.filter(o => { o.x -= speed; return o.x > -60; });
-    if(!obstacles.length || obstacles[obstacles.length-1].x < c.width - (140+Math.random()*120)) spawnObstacle();
-
-    // Perlanggaran
-    for(let o of obstacles) {
-        if( dino.x+6 < o.x+o.w && dino.x+dino.w-6 > o.x &&
-            dino.y+8 < o.y+o.h && dino.y+dino.h > o.y ) {
-            gameOver(); return;
-        }
-    }
-
-    ctx.clearRect(0,0,c.width,c.height);
-    drawBg(); drawObstacles(); drawDino();
-
-    animFrame = requestAnimationFrame(loop);
-}
-
-// MULA / MULA SEMULA - ✅ SEMUA DIRESET SEPENUHNYA
-function startGame() {
-    // Hentikan gelung lama jika ada
-    if(animFrame) cancelAnimationFrame(animFrame);
-    
-    // Sembunyi skrin
-    document.getElementById("startScreen").classList.add("hide");
-    document.getElementById("overScreen").classList.add("hide");
-
-    // SET SEMULA KEADAAN PENUH
-    resize();
-    score = 0; timeSec = 0; speed = 3.5;
-    obstacles = [];
-    dino.x = 50; dino.y = groundY - dino.h;
-    dino.vy = 0; dino.onGround = true;
-    
-    running = true;
-    lastTime = performance.now();
-    animFrame = requestAnimationFrame(loop);
-}
-
-function gameOver() {
-    running = false;
-    if(animFrame) cancelAnimationFrame(animFrame);
-    
-    document.getElementById("resScore").textContent = score;
-    document.getElementById("resTime").textContent = timeSec;
-    document.getElementById("overScreen").classList.remove("hide");
-}
-
-function saveRecord() {
-    db.ref("scores").push({
-        name: document.getElementById("playerName").value || "Tetamu",
-        score: score, time: timeSec
-    }).then(()=>alert("✅ Disimpan!"));
-}
-
-// Kawalan Sentuh & Papan Kekunci
-touch.addEventListener("touchstart", e=>{e.preventDefault(); jump();});
-touch.addEventListener("mousedown", jump);
-document.addEventListener("keydown", e=>{ if(e.code==="Space") {e.preventDefault(); jump();} });
-
-// Butang
-document.getElementById("startBtn").onclick = startGame;
-document.getElementById("restartBtn").onclick = startGame;
-document.getElementById("saveBtn").onclick = saveRecord;
-
-// Sedia Mula Pertama Kali
-resize();
-drawBg(); drawDino();
-window.addEventListener("resize", ()=>{resize(); drawBg(); drawDino();});
+(function(){
+  var css = document.createElement('style');
+  css.textContent = ':root{--bg:#faf9f4;--card:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#297a2e;--accent2:#d97706;--accent3:#4f46e5;--gold:#facc15;}';
+  document.head.appendChild(css);
+})();
 </script>
-</body>
-</html>
+
+<script>
+const LEADERBOARD_KEY = 'dino_runner_global_leaderboard';
+let leaderboard = [];
+
+// ✅ TAMBAH: Menjana rentang kod & memuatkan data
+function encodeBoard(data) {
+  return btoa(encodeURIComponent(JSON.stringify(data)));
+}
+
+function decodeBoard(code) {
+  try {
+    return JSON.parse(decodeURIComponent(atob(code)));
+  } catch {
+    alert("⚠️ Kod tidak sah atau rosak!");
+    return null;
+  }
+}
+
+function loadLeaderboard() {
+  const local = localStorage.getItem(LEADERBOARD_KEY);
+  leaderboard = local ? JSON.parse(local) : [];
+  renderLeaderboard();
+}
+
+function saveLeaderboard() {
+  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboard));
+}
+
+function addScore(name, score, time) {
+  if (!name || name.trim() === '') name = 'Pemain Tanpa Nama';
+  name = name.trim().substring(0, 12);
+  leaderboard.push({
+    name: name, score: score, time: time,
+    date: new Date().toLocaleDateString('ms-MY')
+  });
+  leaderboard.sort((a, b) => b.score - a.score);
+  leaderboard = leaderboard.slice(0, 10);
+  saveLeaderboard();
+  renderLeaderboard();
+  const rank = leaderboard.findIndex(e => e.name === name && e.score === score);
+  return rank >= 0 && rank < 10;
+}
+
+function renderLeaderboard() {
+  const list = document.getElementById('leaderList');
+  if (leaderboard.length === 0) {
+    list.innerHTML = '<p style="opacity:0.7;padding:16px;">Belum ada rekod.<br>Jadilah pemain pertama!</p>';
+    return;
+  }
+  list.innerHTML = leaderboard.map((e, i) => {
+    const medal = i === 0 ? '1' : i === 1 ? '2' : i === 2 ? '3' : (i+1).toString();
+    const bg = i === 0 ? 'rgba(250,204,21,0.25)' : i === 1 ? 'rgba(203,213,225,0.2)' : i === 2 ? 'rgba(180,83,9,0.2)' : 'transparent';
+    const medalColor = i === 0 ? '#facc15' : i === 1 ? '#cbd5e1' : i === 2 ? '#b45309' : '#94a3b8';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 6px;border-radius:6px;background:${bg};margin-bottom:4px;">
+      <span style="font-weight:700;width:24px;color:${medalColor};">${medal}</span>
+      <span style="flex:1;text-align:left;margin-left:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.name}</span>
+      <span style="font-weight:700;color:#facc15;">${e.score}</span>
+    </div>`;
+  }).join('');
+}
+
+// ✅ Fungsi butang bahagian papan ketua
+document.addEventListener('DOMContentLoaded', () => {
+  const expBtn = document.getElementById('exportBtn');
+  const impToggle = document.getElementById('importToggleBtn');
+  const impArea = document.getElementById('importData');
+  const confirmBtn = document.getElementById('confirmImportBtn');
+  const notice = document.getElementById('exportNotice');
+
+  // Eksport & salin ke papan keratan
+  expBtn.addEventListener('click', () => {
+    if (!leaderboard.length) { alert("Tiada data untuk dikongsi!"); return; }
+    const code = encodeBoard(leaderboard);
+    navigator.clipboard?.writeText(code) || prompt("Salin kod ini:", code);
+    notice.style.display = 'block';
+    setTimeout(() => notice.style.display = 'none', 2500);
+  });
+
+  impToggle.addEventListener('click', () => {
+    impArea.style.display = impArea.style.display === 'block' ? 'none' : 'block';
+    confirmBtn.style.display = impArea.style.display;
+  });
+
+  confirmBtn.addEventListener('click', () => {
+    const dat = decodeBoard(impArea.value.trim());
+    if (!dat || !Array.isArray(dat)) return;
+    if (!confirm("⚠️ Ini akan menggantikan senarai semasa! Teruskan?")) return;
+    leaderboard = dat;
+    saveLeaderboard();
+    renderLeaderboard();
+    alert("✅ Papan ketua dikemaskini!");
+    impArea.style.display = confirmBtn.style.display = 'none';
+  });
+});
+</script>
+
+<script>
+(function(){
+  var canvas = document.getElementById('gameCanvas');
+  var ctx = canvas.getContext('2d');
+  
+  var BASE_W = 800, BASE_H = 360;
+  canvas.width = BASE_W;
+  canvas.height = BASE_H;
+  
+  var groundY = BASE_H - 60;
+  
+  var startPanel = document.getElementById('startPanel');
+  var overPanel = document.getElementById('overPanel');
+  var leaderPanel = document.getElementById('leaderPanel');
+  var scorePanel = document.getElementById('scorePanel');
+  var finalInfo = document.getElementById('finalInfo');
+  var newRecord = document.getElementById('newRecord');
+  var startBtn = document.getElementById('startBtn');
+  var againBtn = document.getElementById('againBtn');
+  var leaderBtn = document.getElementById('leaderBtn');
+  var toLeaderBtn = document.getElementById('toLeaderBtn');
+  var closeLeaderBtn = document.getElementById('closeLeaderBtn');
+  var submitScoreBtn = document.getElementById('submitScoreBtn');
+  var playerName = document.getElementById('playerName');
+  var gameWrap = document.getElementById('gameWrap');
+  
+  var running = false;
+  var gameTime = 0;
+  var score = 0;
+  var lastTs = 0;
+  var obsTimer = 0;
+  var pendingScore = null;
+  
+  var audioCtx = null;
+  
+  loadLeaderboard();
+  
+  function initAudio(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+    }
+    if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+  }
+  
+  function beep(freq, dur, type, vol){
+    if(!audioCtx) return;
+    try{
+      var o = audioCtx.createOscillator();
+      var g = audioCtx.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      g.gain.setValueAtTime(vol||0.2, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + dur);
+    }catch(e){}
+  }
+  
+  function soundStart(){ beep(520,0.12,'sine',0.25); setTimeout(function(){beep(780,0.15,'sine',0.22);},80); }
+  function soundJump(){ beep(440,0.08,'square',0.18); }
+  function soundHit(){ beep(160,0.28,'sawtooth',0.3); }
+  function soundOver(){ setTimeout(function(){beep(200,0.4,'triangle',0.25);},140); }
+  
+  function getSpeed(){
+    var mins = gameTime / 60;
+    if(mins < 1) return 3.5;
+    if(mins < 2) return 5;
+    if(mins < 3) return 6.5;
+    if(mins < 4) return 8;
+    if(mins < 5) return 9.5;
+    return 11;
+  }
+  
+  function getObsInterval(){
+    var mins = gameTime / 60;
+    if(mins < 1) return 2200;
+    if(mins < 2) return 1900;
+    if(mins < 3) return 1700;
+    if(mins < 4) return 1550;
+    if(mins < 5) return 1400;
+    return 1300;
+  }
+  
+  var MIN_GAP = 280;
+  
+  var dino = {
+    x: 70, y: groundY, w: 52, h: 58,
+    vy: 0, jumping: false, legFrame: 0, legTimer: 0,
+    reset: function(){ this.y = groundY; this.vy = 0; this.jumping = false; this.legFrame=0; this.legTimer=0; },
+    jump: function(){
+      if(this.jumping) return;
+      this.jumping = true;
+      this.vy = -14;
+      soundJump();
+    },
+    update: function(dt){
+      if(this.jumping){
+        this.vy += 0.7;
+        this.y += this.vy;
+        if(this.y >= groundY){
+          this.y = groundY;
+          this.jumping = false;
+          this.vy = 0;
+        }
+      } else {
+        this.legTimer += dt;
+        if(this.legTimer > 100){
+          this.legTimer = 0;
+          this.legFrame = (this.legFrame + 1) % 2;
+        }
+      }
+    },
+    draw: function(){
+      var bx = this.x, by = this.y - this.h;
+      ctx.fillStyle = '#5a9e3a';
+      ctx.beginPath();
+      ctx.ellipse(bx+22, by+32, 22, 18, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(bx+42, by+14, 14, 12, 0.2, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillRect(bx+38, by+18, 10, 16);
+      ctx.beginPath();
+      ctx.moveTo(bx+4, by+28);
+      ctx.lineTo(bx-6, by+22);
+      ctx.lineTo(bx-4, by+32);
+      ctx.lineTo(bx+6, by+34);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(bx+46, by+10, 4, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(bx+47, by+10, 2, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#4a8a2e';
+      ctx.beginPath();
+      ctx.moveTo(bx+50, by+16);
+      ctx.lineTo(bx+56, by+15);
+      ctx.lineTo(bx+50, by+19);
+      ctx.fill();
+      ctx.fillStyle = '#4a8a2e';
+      if(this.jumping || this.legFrame === 0){
+        ctx.fillRect(bx+12, by+48, 8, 10);
+        ctx.fillRect(bx+28, by+46, 8, 12);
+      } else {
+        ctx.fillRect(bx+12, by+46, 8, 12);
+        ctx.fillRect(bx+28, by+48, 8, 10);
+      }
+      ctx.fillStyle = '#6db84a';
+      ctx.beginPath();
+      ctx.ellipse(bx+18, by+28, 8, 5, -0.3, 0, Math.PI*2);
+      ctx.fill();
+    },
+    box: function(){
+      return {x:this.x+6, y:this.y-this.h+6, w:this.w-12, h:this.h-10};
+    }
+  };
+  
+  var obstacles = [];
+  var clouds = [];
+  
+  function initClouds(){
+    clouds = [];
+    for(var i=0;i<4;i++){
+      clouds.push({x: Math.random()*BASE_W, y: 30+Math.random()*60, s: 0.5+Math.random()*0.5});
+    }
+  }
+  
+  function makeObs(){
+    if(obstacles.length > 0){
+      var last = obstacles[obstacles.length-1];
+      if(last.x > BASE_W - MIN_GAP) return;
+    }
+    var types = ['cactus','fence','rock'];
+    var t = types[Math.floor(Math.random()*3)];
+    var o = {x: BASE_W+30, type: t};
+    if(t==='cactus'){ o.w=26; o.h=52; }
+    else if(t==='fence'){ o.w=44; o.h=34; }
+    else { o.w=34; o.h=26; }
+    o.y = groundY - o.h;
+    obstacles.push(o);
+  }
+  
+  function drawObs(o){
+    if(o.type==='cactus'){
+      ctx.fillStyle = '#2d8a3e';
+      ctx.fillRect(o.x+8, o.y, 10, o.h);
+      ctx.fillRect(o.x, o.y+14, 8, 6);
+      ctx.fillRect(o.x, o.y+14, 4, 20);
+      ctx.fillRect(o.x+18, o.y+10, 8, 6);
+      ctx.fillRect(o.x+22, o.y+10, 4, 22);
+      ctx.fillStyle = '#1f6b2d';
+      ctx.fillRect(o.x+8, o.y, 3, o.h);
+    } else if(o.type==='fence'){
+      ctx.fillStyle = '#8B4513';
+      for(var i=0;i<4;i++){
+        var px = o.x + i*11;
+        ctx.beginPath();
+        ctx.moveTo(px, o.y+o.h);
+        ctx.lineTo(px+5, o.y);
+        ctx.lineTo(px+10, o.y+o.h);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#6b3410';
+      ctx.fillRect(o.x, o.y+10, o.w, 3);
+      ctx.fillRect(o.x, o.y+22, o.w, 3);
+    } else {
+      ctx.fillStyle = '#7f8c8d';
+      ctx.beginPath();
+      ctx.ellipse(o.x+o.w/2, o.y+o.h/2, o.w/2, o.h/2, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#95a5a6';
+      ctx.beginPath();
+      ctx.ellipse(o.x+o.w/2-5, o.y+o.h/2-4, o.w/5, o.h/5, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#5d6d6e';
+      ctx.beginPath();
+      ctx.ellipse(o.x+o.w/2+6, o.y+o.h/2+3, o.w/6, o.h/6, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+  
+  function hit(a,b){
+    return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
+  }
+  
+  function drawBG(speed){
+    ctx.fillStyle = '#c8e6f5';
+    ctx.fillRect(0,0,BASE_W,BASE_H);
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    clouds.forEach(function(c){
+      c.x -= speed * 0.15 * c.s;
+      if(c.x < -60) c.x = BASE_W + 30;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, 16*c.s, 0, Math.PI*2);
+      ctx.arc(c.x+18*c.s, c.y, 14*c.s, 0, Math.PI*2);
+      ctx.arc(c.x-14*c.s, c.y, 12*c.s, 0, Math.PI*2);
+      ctx.fill();
+    });
+    ctx.fillStyle = '#a8d5a2';
+    ctx.beginPath();
+    ctx.moveTo(0, groundY);
+    for(var x=0;x<=BASE_W;x+=40){
+      ctx.lineTo(x, groundY - 15 - Math.sin(x*0.02 + gameTime)*8);
+    }
+    ctx.lineTo(BASE_W, groundY);
+    ctx.fill();
+    ctx.fillStyle = '#8b6914';
+    ctx.fillRect(0, groundY, BASE_W, BASE_H-groundY);
+    ctx.fillStyle = '#6b4f0e';
+    var groundOffset = (gameTime * speed * 8) % 40;
+    for(var j=-40;j<BASE_W;j+=40){
+      var gx = j - groundOffset + 40;
+      ctx.fillRect(gx, groundY+8, 22, 3);
+      ctx.fillRect(gx+10, groundY+20, 14, 2);
+      ctx.fillRect(gx+5, groundY+32, 18, 2);
+    }
+  }
+  
+  function loop(ts){
+    if(!running) return;
+    var dt = ts - lastTs;
+    lastTs = ts;
+    gameTime += dt/1000;
+    score = Math.floor(gameTime * 10);
+    scorePanel.textContent = 'Masa: ' + Math.floor(gameTime) + 's | Skor: ' + score;
+    var speed = getSpeed();
+    var obsInt = getObsInterval();
+    obsTimer += dt;
+    if(obsTimer >= obsInt){ obsTimer = 0; makeObs(); }
+    dino.update(dt);
+    for(var i=obstacles.length-1;i>=0;i--){
+      var o = obstacles[i];
+      o.x -= speed;
+      if(o.x + o.w < 0){ obstacles.splice(i,1); continue; }
+      if(hit(dino.box(), o)){ gameOver(); return; }
+    }
+    drawBG(speed);
+    obstacles.forEach(drawObs);
+    dino.draw();
+    requestAnimationFrame(loop);
+  }
+  
+  function startGame(){
+    if (!playerName.value.trim()) {
+      playerName.value = 'Pemain ' + Math.floor(Math.random() * 9999);
+    }
+    initAudio();
+    running = true;
+    gameTime = 0;
+    score = 0;
+    obsTimer = 0;
+    obstacles = [];
+    pendingScore = null;
+    dino.reset();
+    initClouds();
+    startPanel.style.display = 'none';
+    overPanel.style.display = 'none';
+    leaderPanel.style.display = 'none';
+    soundStart();
+    lastTs = performance.now();
+    requestAnimationFrame(loop);
+  }
+  
+  function gameOver(){
+    running = false;
+    soundHit();
+    soundOver();
+    var mins = Math.floo
