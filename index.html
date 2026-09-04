@@ -13,7 +13,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { gelap:'#0f172a', bumi:'#1e293b', dino:'#22c55e', halang:'#dc2626' }}}
+            theme: { extend: { colors: { gelap:'#0f172a', bumi:'#166534', dino:'#22c55e', dinoGelap:'#15803d', halang:'#92400e', langit:'#87ceeb' }}}
         }
     </script>
     <style>
@@ -21,26 +21,21 @@
         html, body { 
             height:100%; 
             overflow:hidden; 
-            touch-action:none; 
-            touch-action:manipulation; 
             font-family:'Segoe UI', sans-serif;
-        }
-        body { 
-            display:flex; 
-            flex-direction:column; 
-            align-items:center; 
-            justify-content:center; 
-            background:#020617;
-            padding:0; margin:0;
+            background:#0f172a;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:8px;
         }
         #gameContainer { 
             position:relative; 
             width:100%; 
             max-width:900px; 
-            height:min(70vh, 520px);
-            border-radius:12px; 
+            height:min(72vh, 480px);
+            border-radius:16px; 
             overflow:hidden; 
-            box-shadow:0 0 40px rgba(34,197,94,0.15);
+            box-shadow:0 10px 40px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,255,255,.08);
         }
         #gameCanvas { 
             display:block; 
@@ -58,7 +53,7 @@
         .btn { 
             background:#2563eb; border:none; padding:0.9rem 2.2rem; border-radius:12px; 
             font-weight:bold; font-size:1.15rem; color:white; margin:0.6rem; cursor:pointer; 
-            transition:transform .15s, scale .15s; width:min(100%, 280px);
+            transition:transform .15s; width:min(100%, 280px);
             box-shadow:0 4px 12px rgba(0,0,0,.25);
         }
         .btn:active { transform:scale(0.94); }
@@ -75,19 +70,20 @@
         #senaraiSkor { width:min(95%,450px); max-height:55vh; overflow-y:auto; background:#1e293b; border-radius:12px; margin:1rem 0; }
         .tajuk { text-align:center; font-size:1.4rem; font-weight:bold; padding:.9rem; background:#0f172a; border-radius:12px 12px 0 0; }
         #sentuhPerintang { position:absolute; inset:0; z-index:5; cursor:pointer; }
+        #paparanSkor{position:absolute;top:12px;left:12px;z-index:6;background:rgba(255,255,255,.9);padding:6px 14px;border-radius:8px;font-weight:bold;color:#0f172a;box-shadow:0 2px 8px #0002;}
     </style>
 </head>
 <body>
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
-        <!-- Lapisan sentuh tambahan -->
+        <div id="paparanSkor">Skor: 0</div>
         <div id="sentuhPerintang"></div>
 
         <!-- Skrin Mula -->
         <div id="mulaSkrin" class="skrin">
             <h1 class="text-3xl font-bold mb-4">🦖 Dino Runner</h1>
-            <p class="mb-2 text-center text-slate-200">Ketuh mana-mana untuk lompat</p>
-            <p class="mb-6 text-center text-slate-300 text-sm">Lama bertahan = Skor tinggi!</p>
+            <p class="mb-2 text-center text-slate-200">Ketuh skrin mana-mana untuk lompat</p>
+            <p class="mb-6 text-center text-slate-300 text-sm">Elak kaktus & halangan!</p>
             <button id="btnMula" class="btn">MULAI PERMAINAN</button>
             <button id="btnPapan" class="btn btn-amber">🏆 Papan Skor</button>
         </div>
@@ -133,88 +129,130 @@
     const skorRef = db.ref("skor");
     let pendengarSkor = null;
 
-    // Bunyi
+    // Bunyi ringkas
     const Bunyi = {
-        lompat: ()=>{try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g),g.connect(a.destination);o.frequency.value=520;g.gain.value=.1;o.start();o.frequency.exponentialRampToValueAtTime(880,a.currentTime+.12);g.gain.exponentialRampToValueAtTime(.01,a.currentTime+.15);}catch(e){}},
+        lompat: ()=>{try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g),g.connect(a.destination);o.frequency.value=520;g.gain.value=.1;o.start();o.frequency.exponentialRampToValueAtTime(880,a.currentTime+.12);}catch(e){}},
         hentam: ()=>{try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.type="sawtooth";o.connect(g),g.connect(a.destination);o.frequency.value=150;g.gain.value=.15;o.start();o.stop(a.currentTime+.25);}catch(e){}}
     };
 
-    // Elemen
+    // Elemen & Pembolehubah
     const c=document.getElementById("gameCanvas"), ctx=c.getContext("2d");
     const bekas=document.getElementById("gameContainer");
     const sentuhEl=document.getElementById("sentuhPerintang");
+    const paparanSkor=document.getElementById("paparanSkor");
     const skrinMula=document.getElementById("mulaSkrin"), skrinTamat=document.getElementById("tamatSkrin"), skrinPapan=document.getElementById("papanSkrin");
     const isiPapan=document.getElementById("isiPapan");
 
-    let sedangMain=false, masaLalu=0, skor=0, kelajuan=5, tanahY=0;
-    let dino={x:80,y:0,w:44,h:55,lompatK:0,diTanah:true};
+    let sedangMain=false, masaLalu=0, skor=0, kelajuan=5, tanahY=0, skala=1;
+    let dino={x:60,y:0,w:36,h:48,lompatK:0,diTanah:true}; // Lebih langsing
     let halangan=[], halangMasa=0;
 
-    // Saiz Kanvas Tepat
+    // Saiz & Resolusi Tajam
     function tetapkanSaiz(){
         const lebar=bekas.clientWidth;
         const tinggi=bekas.clientHeight;
-        c.width=lebar * window.devicePixelRatio || lebar;
-        c.height=tinggi * window.devicePixelRatio || tinggi;
-        ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
-        tanahY=tinggi - 50;
-        dino.y=tanahY - dino.h;
+        skala=window.devicePixelRatio||1;
+        c.width=lebar*skala;
+        c.height=tinggi*skala;
+        ctx.setTransform(1,0,0,1,0,0);
+        ctx.scale(skala,skala);
+        tanahY=tinggi - 45;
     }
     window.addEventListener("resize", tetapkanSaiz);
 
-    // Lukisan
-    function lukisLatar(){
+    // ✅ LUKISAN YANG LEBIH BAGUS: DINO BUKAN KOTAK
+    function lukisDino(){
+        ctx.save();
+        ctx.translate(dino.x, dino.y);
+        const w=dino.w, h=dino.h;
+        // Badan
+        ctx.fillStyle="#22c55e";
+        ctx.beginPath(); ctx.roundRect(4, h*0.28, w-8, h*0.58, 6); ctx.fill();
+        // Kepala
+        ctx.beginPath(); ctx.roundRect(w-6, h*0.15, w*0.55, h*0.42, 5); ctx.fill();
+        // Mata
+        ctx.fillStyle="#fff"; ctx.fillRect(w+2, h*0.24, 7,7); ctx.fillStyle="#000"; ctx.fillRect(w+4, h*0.27,3,3);
+        // Mulut/Hidung
+        ctx.fillStyle="#166534"; ctx.fillRect(w+w*0.35, h*0.38,4,3);
+        // Kaki
+        ctx.fillStyle="#15803d";
+        ctx.fillRect(8, h*0.82,7,h*0.18); ctx.fillRect(w-12, h*0.82,7,h*0.18);
+        // Ekor
+        ctx.fillStyle="#22c55e";
+        ctx.beginPath(); ctx.moveTo(6,h*0.45); ctx.lineTo(-6,h*0.25); ctx.lineTo(-4,h*0.5); ctx.closePath(); ctx.fill();
+        ctx.restore();
+    }
+
+    // ✅ HALANGAN: BENTUK BERBEZA (KAKTUS / PAGAR / POKOK)
+    function lukisHalang(h){
+        ctx.save(); ctx.translate(h.x,h.y,h.w,h.h);
+        if(h.jenis==="kaktus"){
+            ctx.fillStyle="#15803d";
+            ctx.fillRect(h.w*0.32,0,h.w*0.36,h.h); // Batang tengah
+            ctx.fillRect(0,h.h*0.22,h.w*0.32,h.h*0.18); ctx.fillRect(0,h.h*0.12,h.w*0.18,h.h*0.35); // Kiri
+            ctx.fillRect(h.w*0.68,h.h*0.38,h.w*0.32,h.h*0.18); ctx.fillRect(h.w*0.82,h.h*0.25,h.w*0.18,h.h*0.35); // Kanan
+        } else if(h.jenis==="pagar"){
+            ctx.fillStyle="#78350f";
+            ctx.fillRect(0,0,6,h.h); ctx.fillRect(h.w-6,0,6,h.h); ctx.fillRect(0,h.h*0.35,h.w,5); ctx.fillRect(0,h.h*0.65,h.w,5);
+            // Duri
+            ctx.fillStyle="#44403c";
+            for(let i=12;i<h.w-8;i+=14) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+5,-9); ctx.lineTo(i+10,0); ctx.fill(); }
+        } else { // Pokok/Batang
+            ctx.fillStyle="#713f12"; ctx.fillRect(h.w*0.25,0,h.w*0.5,h.h);
+            ctx.fillStyle="#166534"; ctx.beginPath(); ctx.arc(h.w/2, -8, h.w*0.75,0,Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    function lukisTanahLatar(){
         const w=bekas.clientWidth, h=bekas.clientHeight;
         ctx.clearRect(0,0,w,h);
-        ctx.fillStyle="#87CEEB"; ctx.fillRect(0,0,w,h);
-        ctx.fillStyle="#166534"; ctx.fillRect(0,tanahY,w,50);
+        ctx.fillStyle="#87ceeb"; ctx.fillRect(0,0,w,tanahY+10);
+        ctx.fillStyle="#15803d"; ctx.fillRect(0,tanahY-6,w,12); // Rumput
+        ctx.fillStyle="#78350f"; ctx.fillRect(0,tanahY+6,w,h-tanahY); // Tanah
     }
-    function lukisDino(){
-        ctx.fillStyle="#22c55e"; ctx.fillRect(dino.x,dino.y,dino.w,dino.h);
-        ctx.fillStyle="#fff"; ctx.fillRect(dino.x+8,dino.y+8,9,9);
-        ctx.fillStyle="#000"; ctx.fillRect(dino.x+11,dino.y+11,4,4);
+
+    function buatHalangan(){
+        const jenis=["kaktus","pagar","pokok"][Math.floor(Math.random()*3)];
+        const saiz={kaktus:{w:28,h:44},pagar:{w:36,h:40},pokok:{w:32,h:48}}[jenis];
+        halangan.push({x:bekas.clientWidth+10,y:tanahY-saiz.h,w:saiz.w,h:saiz.h,jenis});
     }
-    function buatHalang(){
-        const jenis=["pokok","kaktus","batu"][Math.floor(Math.random()*3)];
-        halangan.push({x:bekas.clientWidth+20,y:tanahY-45,w:30,h:45,jenis});
-    }
-    function lukisHalang(h){ ctx.fillStyle="#92400e"; ctx.fillRect(h.x,h.y,h.w,h.h); }
 
     // Gelung Utama
     function gelung(t){
         if(!sedangMain) return;
-        const dT=(t-masaLalu)/16; masaLalu=t;
-        skor+=Math.round(dT/3); kelajuan=Math.min(12, 5+skor/60);
+        const dT=Math.min((t-masaLalu)/16,2.5); masaLalu=t;
+        skor+=Math.round(dT/2.5); kelajuan=Math.min(13,5 + skor/70);
+        paparanSkor.textContent="Skor: "+skor;
 
-        // Lompat/Graviti
+        // Graviti & Lompat
         if(!dino.diTanah){
-            dino.lompatK += 1.1*dT; dino.y += dino.lompatK*dT;
+            dino.lompatK += 1.15*dT; dino.y += dino.lompatK*dT;
             if(dino.y+dino.h >= tanahY){
                 dino.y=tanahY-dino.h; dino.diTanah=true; dino.lompatK=0;
             }
         }
 
-        halangMasa+=dT; if(halangMasa>65){ buatHalang(); halangMasa=0; }
-        halangan=halangan.filter(h=>{h.x-=kelajuan*dT; return h.x>-50;});
+        halangMasa+=dT; if(halangMasa>Math.max(38,72-kelajuan*2.5)){ buatHalangan(); halangMasa=0; }
+        halangan=halangan.filter(h=>{h.x-=kelajuan*dT; return h.x+h.w>-10;});
 
-        // Langgar
+        // Perlanggaran tepat
         for(let h of halangan){
-            if(dino.x+6 <h.x+h.w && dino.x+dino.w-6>h.x && dino.y+dino.h>h.y){
+            const pelarasan=6;
+            if(dino.x+pelarasan <h.x+h.w-pelarasan && dino.x+dino.w-pelarasan>h.x+pelarasan && dino.y+dino.h-pelarasan>h.y){
                 sedangMain=false; Bunyi.hentam(); tamatMain(); return;
             }
         }
 
-        lukisLatar(); lukisDino(); halangan.forEach(lukisHalang);
-        ctx.font="bold 18px sans-serif"; ctx.fillStyle="#1e293b";
-        ctx.fillText(`Skor: ${skor}`,16,28);
+        lukisTanahLatar(); halangan.forEach(lukisHalang); lukisDino();
         requestAnimationFrame(gelung);
     }
 
-    function lompat(){ if(dino.diTanah && sedangMain){ dino.lompatK=-14; dino.diTanah=false; Bunyi.lompat(); } }
+    function lompat(){ if(dino.diTanah && sedangMain){ dino.lompatK=-14.8; dino.diTanah=false; Bunyi.lompat(); } }
     function mulaMain(){
         skrinMula.classList.add("sembunyi"); skrinTamat.classList.add("sembunyi"); skrinPapan.classList.add("sembunyi");
         tetapkanSaiz(); sedangMain=true; masaLalu=performance.now(); skor=0; halangan=[]; halangMasa=0;
-        dino.x=60; dino.y=tanahY-dino.h; dino.diTanah=true;
+        dino.x=50; dino.y=tanahY-dino.h; dino.diTanah=true; paparanSkor.textContent="Skor: 0";
         requestAnimationFrame(gelung);
     }
     function tamatMain(){
@@ -224,30 +262,27 @@
     }
     async function simpanSkor(){
         const nama=(document.getElementById("namaPemain").value||"Anonim").trim();
-        await skorRef.push({nama,skor,tarikh:new Date().toISOString()}); alert("✅ Disimpan!"); bukaPapan();
+        await skorRef.push({nama,skor,tarikh:new Date().toISOString()}); alert("✅ Disimpan ke awan!"); bukaPapan();
     }
 
     function bukaPapan(){
         skrinMula.classList.add("sembunyi"); skrinTamat.classList.add("sembunyi"); skrinPapan.classList.remove("sembunyi");
         if(pendengarSkor) skorRef.off("value",pendengarSkor);
         pendengarSkor=skorRef.orderByChild("skor").limitToLast(10).on("value",s=>{
-            isiPapan.innerHTML=""; if(!s.exists()){isiPapan.innerHTML="<p class='p-4 text-center'>Tiada rekod</p>";return;}
+            isiPapan.innerHTML=""; if(!s.exists()){isiPapan.innerHTML="<p class='p-4 text-center'>Belum ada rekod</p>";return;}
             const data=Object.values(s.val()).sort((a,b)=>b.skor-a.skor);
             data.forEach((p,i)=>{const el=document.createElement("div");el.className=`baris ke-${i+1<=3?i+1:""}`;el.innerHTML=`<span>${i+1}. ${p.nama}</span><span>${p.skor}</span>`;isiPapan.appendChild(el);});
         });
     }
     function tutupPapan(){ skrinPapan.classList.add("sembunyi"); skrinMula.classList.remove("sembunyi"); if(pendengarSkor){ skorRef.off(); pendengarSkor=null;} }
 
-    // ✅ KAWALAN SENTUH YANG PASTI BERFUNGSI
+    // Kawalan Sentuh & Papan Kekunci
     function ikatKawalan(){
-        const lompatFn=(e)=>{
-            if(e) e.preventDefault();
-            lompat();
-        };
-        sentuhEl.addEventListener("touchstart", lompatFn, {passive:false});
-        sentuhEl.addEventListener("mousedown", lompatFn);
-        c.addEventListener("touchstart", lompatFn, {passive:false});
-        document.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="ArrowUp"){e.preventDefault();if(sedangMain)lompat();}});
+        const tekan=e=>{ e?.preventDefault?.(); if(sedangMain) lompat(); };
+        sentuhEl.addEventListener("touchstart",tekan,{passive:false});
+        sentuhEl.addEventListener("mousedown",tekan);
+        c.addEventListener("touchstart",tekan,{passive:false});
+        document.addEventListener("keydown",e=>{if((e.code==="Space"||e.code==="ArrowUp")&&!e.repeat){e.preventDefault(); lompat();}});
     }
 
     // Butang
@@ -258,7 +293,7 @@
     document.getElementById("btnUtama").onclick=tutupPapan;
     document.getElementById("kembaliUtama").onclick=tutupPapan;
 
-    tetapkanSaiz(); ikatKawalan(); lukisLatar(); lukisDino();
+    tetapkanSaiz(); ikatKawalan(); lukisTanahLatar(); lukisDino();
     </script>
 </body>
 </html>
