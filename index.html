@@ -1,490 +1,207 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
-    <title>Dino Runner - Versi Cantik & Lancar</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: { 
-                extend: { 
-                    colors: { 
-                        latarLangit: '#a9d6f5',
-                        dinoBadan: '#22c55e',
-                        dinoPerut: '#86efac',
-                        dinoGelap: '#166534',
-                        tanahDasar: '#8b4513',
-                        garisRumput: '#15803d',
-                        halangBatang: '#78350f'
-                    } 
-                } 
-            }
-        }
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { 
-            height: 100%; overflow: hidden; 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            background-color: #0f172a; 
-            display: flex; align-items: center; justify-content: center; 
-            padding: .5rem;
-        }
-        #bungkusPermainan { 
-            position: relative; width: 100%; max-width: 900px; 
-            height: min(72vh, 520px); 
-            border-radius: 16px; overflow: hidden; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        }
-        #kanvas { 
-            display: block; width: 100%; height: 100%; 
-            background: linear-gradient(#a9d6f5, #e0f2fe); 
-            touch-action: none;
-        }
-        #lapisanSentuh { position: absolute; inset: 0; z-index: 5; cursor: pointer; }
-        
-        .paparan {
-            position: absolute; top: 12px; 
-            background: rgba(255,255,255,.95);
-            padding: 8px 18px; border-radius: 14px;
-            font-weight: bold; font-size: 1.1rem;
-            box-shadow: 0 3px 12px rgba(0,0,0,.1);
-            z-index: 6;
-        }
-        #paparanSkor { left: 12px; color: #1e293b; }
-        #paparanMasa { right: 12px; color: #1e293b; }
-
-        .skrinTindih {
-            position: absolute; inset: 0; 
-            background: rgba(15,23,42,.92);
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            color: white; padding: 1.5rem;
-            z-index: 10;
-        }
-        .sembunyi { display: none !important; }
-        
-        .butang {
-            border: none; border-radius: 14px;
-            padding: 1rem 2.5rem; margin: .6rem auto;
-            font-weight: bold; font-size: 1.2rem;
-            width: min(96%, 320px);
-            cursor: pointer; transition: transform .15s ease;
-            box-shadow: 0 6px 16px rgba(0,0,0,.25);
-        }
-        .butang:active { transform: scale(.96); }
-        .bBiru { background: #2563eb; color: white; }
-        .bHijau { background: #16a34a; color: white; }
-        .bKuning { background: #d97706; color: white; }
-        .bKelabu { background: #475569; color: white; }
-
-        .inputNama {
-            padding: 1rem; border-radius: 12px; border: none;
-            width: min(96%, 320px); font-size: 1.1rem;
-            text-align: center; margin-bottom: 1rem;
-            color: #1e293b;
-        }
-        .kotakSenarai {
-            background: #1e293b; border-radius: 14px;
-            width: min(96%, 450px); max-height: 55vh; overflow-y: auto; margin-top: 1rem;
-        }
-        .tajukSenarai {
-            background: #0f172a; padding: 1rem; text-align: center;
-            font-weight: bold; font-size: 1.3rem; border-radius: 14px 14px 0 0;
-        }
-        .barisRekod {
-            display: flex; justify-content: space-between;
-            padding: .9rem 1.4rem; border-bottom: 1px solid #334155;
-        }
-        .kedudukan1 { background: #b45309; font-weight: bold; }
-        .kedudukan2 { background: #64748b; font-weight: bold; }
-        .kedudukan3 { background: #78350f; font-weight: bold; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Dino Fix Muktamad</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#111;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;}
+#kotak{width:min(96%,500px);height:min(70vh,500px);position:relative;border-radius:14px;overflow:hidden;}
+#kanvas{background:#a3d8ff;width:100%;height:100%;display:block;}
+#sentuh{position:absolute;inset:0;z-index:5;}
+#info{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;z-index:6;}
+.kotak-kecil{background:rgba(255,255,255,.9);padding:6px 14px;border-radius:10px;font-weight:bold;}
+.lindung{position:absolute;inset:0;background:rgba(0,0,0,.8);z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;gap:1rem;padding:1rem;}
+.sembunyi{display:none !important;}
+button{padding:.9rem 2rem;border:none;border-radius:12px;font-weight:bold;font-size:1.1rem;width:min(100%,280px);cursor:pointer;}
+.biru{background:#2563eb;color:#fff;}
+.hijau{background:#16a34a;color:#fff;}
+</style>
 </head>
 <body>
-    <div id="bungkusPermainan">
-        <canvas id="kanvas"></canvas>
-        <div id="paparanSkor" class="paparan">Skor: 0</div>
-        <div id="paparanMasa" class="paparan">Masa: 0s</div>
-        <div id="lapisanSentuh"></div>
 
-        <div id="skrinMula" class="skrinTindih">
-            <h1 class="text-4xl font-bold mb-2">🦖 Dino Runner</h1>
-            <p class="text-xl mb-1">👆 Ketuh skrin mana-mana untuk lompat</p>
-            <p class="text-slate-300 mb-6">✅ Mula PERLAHAN & makin laju sedikit demi sedikit</p>
-            <button id="mulaBtn" class="butang bBiru">▶️ MULAI PERMAINAN</button>
-            <button id="papanBtn" class="butang bKuning">🏆 Papan Skor</button>
-        </div>
-
-        <div id="skrinTamat" class="skrinTindih sembunyi">
-            <h2 class="text-3xl font-bold text-red-400 mb-4">PERMAINAN TAMAT!</h2>
-            <p class="text-xl mb-2">Masa bertahan: <span id="nilaiMasa" class="font-bold text-lg">0</span> saat</p>
-            <p class="text-2xl font-bold mb-5">Skor: <span id="nilaiSkor" class="text-yellow-300">0</span></p>
-            
-            <input type="text" id="namaPemain" class="inputNama" placeholder="Nama anda..." maxlength="16">
-            <button id="simpanBtn" class="butang bHijau">✅ Simpan Rekod</button>
-            <button id="ulangBtn" class="butang bBiru">🔄 Main Semula</button>
-            <button id="rumahBtn" class="butang bKelabu">🏠 Laman Utama</button>
-        </div>
-
-        <div id="skrinPapan" class="skrinTindih sembunyi">
-            <div class="kotakSenarai">
-                <div class="tajukSenarai">🏆 10 Rekod Teratas</div>
-                <div id="isiSenarai"></div>
-            </div>
-            <button id="kembaliBtn" class="butang bBiru mt-4">⬅ Kembali Main</button>
-        </div>
+<div id="kotak">
+    <canvas id="kanvas"></canvas>
+    <div id="sentuh"></div>
+    <div id="info">
+        <div class="kotak-kecil">Skor: <span id="nilaiSkor">0</span></div>
+        <div class="kotak-kecil">Masa: <span id="nilaiMasa">0</span>s</div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <div id="mulaSkrin" class="lindung">
+        <h2 style="font-size:1.6rem">🦖 KETUH SKRIN UNTUK LOMPAT</h2>
+        <button id="btnMula" class="biru">MULAI PERMAINAN</button>
+    </div>
 
-    <script>
-    // Firebase
-    const firebaseConfig = {
-      apiKey: "AlzaSyDQ_MoqFHsVIpfq8YefgToN1S9j-p8mRv0",
-      authDomain: "dino-runner-scores.firebaseapp.com",
-      databaseURL: "https://dino-runner-scores-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "dino-runner-scores",
-      storageBucket: "dino-runner-scores.firebasestorage.app"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const rujukanSkor = db.ref("skor");
-    let pemantauData = null;
+    <div id="tamatSkrin" class="lindung sembunyi">
+        <h2 style="color:#ff6b6b">TAMAT!</h2>
+        <p>Skor Akhir: <b id="tamatSkor">0</b></p>
+        <p>Masa: <b id="tamatMasa">0</b>s</p>
+        <button id="btnUlang" class="biru">🔄 MAIN SEMULA</button>
+    </div>
+</div>
 
-    // --- BUNYI MUDAH ---
-    const Bunyi = {
-        lompat() { try { let ctx = new (AudioContext||webkitAudioContext)(); let o=ctx.createOscillator(),g=ctx.createGain();o.type="triangle";o.frequency.setValueAtTime(380,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(600,ctx.currentTime+.12);g.gain.value=.1;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.16);}catch(e){}},
-        hentam() { try { let ctx = new (AudioContext||webkitAudioContext)(); let o=ctx.createOscillator(),g=ctx.createGain();o.type="sawtooth";o.frequency.setValueAtTime(160,ctx.currentTime);g.gain.value=.13;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.25);}catch(e){}}
-    };
+<script>
+// UNSUR UTAMA
+const kanv = document.getElementById('kanvas');
+const k = kanv.getContext('2d');
+const kotak = document.getElementById('kotak');
+const sentuh = document.getElementById('sentuh');
 
-    // --- PERKARA UTAMA ---
-    const kanv = document.getElementById("kanvas"), k = kanv.getContext("2d");
-    const bungkus = document.getElementById("bungkusPermainan");
-    const elSkor = document.getElementById("paparanSkor");
-    const elMasa = document.getElementById("paparanMasa");
-    const sentuhKawasan = document.getElementById("lapisanSentuh");
+// PEMBOLEH UBAH - SENTIASA DIRESET SEPENUHNYA
+let berjalan = false;
+let masaMula = 0;
+let masaTerkini = 0;
+let skor = 0;
+let tanahY = 0;
+let halangan = [];
+let kelajuan = 3.5;
+let idGelung = null;
+
+// OBJEK DINO - MUDAH & TETAP KELIHATAN
+const dino = {
+    x: 50, l: 40, t: 45, y: 0,
+    lompatKuat: -14, tarikan: 0.7, lajuY: 0, diTanah: true
+};
+
+// SAIZ KANVAS
+function ubahSaiz(){
+    kanv.width = kotak.clientWidth;
+    kanv.height = kotak.clientHeight;
+    tanahY = kanv.height - 50;
+    dino.y = tanahY - dino.t;
+}
+
+// LUKIS DINO JELAS & TIDAK PELIK
+function lukisDino(){
+    k.fillStyle="#22bb55";
+    k.fillRect(dino.x+6, dino.y+12, 26, 22);
+    k.beginPath(); k.arc(dino.x+30, dino.y+15, 11, 0, Math.PI*2); k.fill();
     
-    let sedangMain = false;
-    let masaMulaPermainan = 0;
-    let masaTerakhir = 0;
-    let jumlahSkor = 0;
-    let kelajuanDasar = 3.0; // ✅ LEBIH PERLAHAN DARI MULA
-    let kelajuanSemasa = kelajuanDasar;
-    let pecutan = 0.0015; // ✅ PECUTAN LEMBUT
-    let kelajuanMaks = 9;
-    let parasTanah = 0;
-    
-    // Objek Dino
-    let dino = {
-        x: 50, lebar: 46, tinggi: 48, y:0,
-        kelajuanLompat: 0, dayaTarik: 1.15,
-        diTanah: true
-    };
-    
-    let senaraiHalangan = [];
-    let masaHalanganSeterusnya = 0;
+    k.fillStyle="#fff";
+    k.beginPath(); k.arc(dino.x+35, dino.y+11, 5, 0, Math.PI*2); k.fill();
+    k.fillStyle="#000";
+    k.beginPath(); k.arc(dino.x+36, dino.y+12, 2, 0, Math.PI*2); k.fill();
 
-    // Saiz Kanvas
-    let saizSemula = () => {
-        let w = bungkus.clientWidth, h = bungkus.clientHeight;
-        kanv.width = w; kanv.height = h;
-        parasTanah = h - 55;
-        dino.y = parasTanah - dino.tinggi;
-    };
-    window.addEventListener("resize", saizSemula);
+    k.fillStyle="#157d32";
+    k.fillRect(dino.x+8, dino.y+34, 5, 11);
+    k.fillRect(dino.x+25, dino.y+34, 5, 11);
+}
 
-    // 🔷 LUKIS DINO YANG CANTIK, TEGAK SEPERTI GAMBAK DEPAN
-    let lukisDinoCantik = () => {
-        k.save();
-        k.translate(dino.x, dino.y);
+// LATAR & TANAH
+function lukisLatar(){
+    k.clearRect(0,0,kanv.width,kanv.height);
+    k.fillStyle="#a3d8ff"; k.fillRect(0,0,kanv.width,kanv.height);
+    k.fillStyle="#7a4514"; k.fillRect(0,tanahY,kanv.width,50);
+    k.fillStyle="#239b33"; k.fillRect(0,tanahY,kanv.width,5);
+}
 
-        // Badan utama
-        k.fillStyle = "#22c55e";
-        k.beginPath();
-        k.roundRect(10, 18, 28, 24, 7);
-        k.fill();
+// HALANGAN
+function buatHalangan(){
+    halangan.push({
+        x: kanv.width + 20,
+        y: tanahY - 42,
+        l: 20, t: 42
+    });
+}
 
-        // Perut cerah
-        k.fillStyle = "#86efac";
-        k.beginPath();
-        k.roundRect(14, 24, 20, 14, 6);
-        k.fill();
+function lukisHalangan(){
+    halangan.forEach(h=>{
+        k.fillStyle="#5c3c18";
+        k.fillRect(h.x,h.y,h.l,h.t);
+    });
+}
 
-        // Kepala besar & tegak
-        k.fillStyle = "#22c55e";
-        k.beginPath();
-        k.arc(36, 18, 14, 0, Math.PI*2);
-        k.fill();
+// LOMPAT
+function lompat(){
+    if(dino.diTanah && berjalan){
+        dino.lajuY = dino.lompatKuat;
+        dino.diTanah = false;
+    }
+}
 
-        // Mata
-        k.fillStyle = "#fff";
-        k.beginPath(); k.arc(41, 13, 6, 0, Math.PI*2); k.fill();
-        k.fillStyle = "#000";
-        k.beginPath(); k.arc(43, 14, 3, 0, Math.PI*2); k.fill();
+// GELUNG UTAMA - DIREKA SUPAYA TIDAK ROSAK BILA DIULANG
+function gelungUtama(masa){
+    if(!berjalan) return;
 
-        // Mulut
-        k.fillStyle = "#15803d";
-        k.fillRect(45, 22, 5, 2);
+    // KIRAAN LICIN & TEPAT
+    masaTerkini = Math.floor((masa - masaMula)/1000);
+    skor += 1; // Kadar skor stabil
+    document.getElementById('nilaiSkor').textContent = skor;
+    document.getElementById('nilaiMasa').textContent = masaTerkini;
 
-        // Duri cantik belakang
-        k.fillStyle = "#15803d";
-        k.beginPath(); k.moveTo(14,16);k.lineTo(19,6);k.lineTo(24,16);k.fill();
-        k.beginPath(); k.moveTo(24,15);k.lineTo(30,3);k.lineTo(35,15);k.fill();
+    // Kelajuan perlahan
+    kelajuan += 0.003;
 
-        // Tangan pendek T-Rex
-        k.fillRect(28, 26, 5, 9);
+    // Fizik Dino
+    dino.lajuY += dino.tarikan;
+    dino.y += dino.lajuY;
+    if(dino.y + dino.t >= tanahY){
+        dino.y = tanahY - dino.t;
+        dino.diTanah = true;
+        dino.lajuY = 0;
+    }
 
-        // Kaki tegap & cantik
-        k.fillStyle = "#166534";
-        k.fillRect(12, 39, 7, 10);
-        k.fillRect(27, 39, 7, 10);
+    // Halangan & jarak
+    halangan = halangan.filter(h=>{h.x -= kelajuan; return h.x > -40;});
+    if(halangan.length === 0 || halangan[halangan.length-1].x < kanv.width - 160){
+        buatHalangan();
+    }
 
-        // Ekor
-        k.fillStyle = "#22c55e";
-        k.beginPath();
-        k.ellipse(6, 30, 9, 6, -0.55, 0, Math.PI*2);
-        k.fill();
+    // PERLANGGARAN
+    for(let h of halangan){
+        if( dino.x+6 < h.x+h.l && dino.x+dino.l-6 > h.x &&
+            dino.y+4 < h.y+h.t && dino.y+dino.t > h.y ){ tamat(); return; }
+    }
 
-        k.restore();
-    };
+    lukisLatar(); lukisHalangan(); lukisDino();
+    idGelung = requestAnimationFrame(gelungUtama);
+}
 
-    // Latar belakang & tanah
-    let lukisLatar = () => {
-        let w = kanv.width, h = kanv.height;
-        // Langit sudah ditetapkan dalam CSS
-        
-        // Garis rumput
-        k.fillStyle = "#15803d";
-        k.fillRect(0, parasTanah, w, 10);
-        
-        // Tanah bawah
-        k.fillStyle = "#78350f";
-        k.fillRect(0, parasTanah+10, w, h - parasTanah - 10);
-    };
+// MULA / MULA SEMULA: PADAM SEGALA-GALANYA DULU
+function mulaBaru(){
+    // HENTIKAN & PADAM LAMA DULU
+    if(idGelung) cancelAnimationFrame(idGelung);
 
-    // Halangan & Pokok TIDAK terapung
-    let lukisHalangan = (h) => {
-        k.save();
-        k.translate(h.x, h.y);
+    // SEMUA DIKOSONGKAN & DIRESET MUTLAK
+    berjalan = false; skor = 0; masaTerkini = 0;
+    halangan = []; kelajuan = 3.5;
+    ubahSaiz();
+    dino.x = 50; dino.y = tanahY - dino.t; dino.lajuY = 0; dino.diTanah = true;
 
-        if(h.jenis === "pokok"){
-            // Batang panjang sampai ke tanah
-            k.fillStyle = halangBatang;
-            k.fillRect((h.w/2)-4, 0, 9, h.h * 0.6);
-            // Hujung/Daun
-            k.fillStyle = "#15803d";
-            k.beginPath(); k.arc(h.w/2, -6, h.w/2 - 2, 0, Math.PI*2); k.fill();
-        }
-        if(h.jenis === "kaktus"){
-            k.fillStyle = "#15803d";
-            k.fillRect(12, 0, 12, h.h);
-            k.fillRect(0, h.h*.25, 12, 8);
-            k.fillRect(0, h.h*.15, 6, 18);
-            k.fillRect(24, h.h*.35, 12, 8);
-            k.fillRect(30, h.h*.22, 6, 18);
-        }
-        if(h.jenis === "pagar"){
-            k.fillStyle = halangBatang;
-            k.fillRect(2,0,4,h.h);
-            k.fillRect(h.w-6,0,4,h.h);
-            k.fillRect(0,h.h*.4,h.w,5);
-            k.fillRect(0,h.h*.65,h.w,5);
-        }
+    // SKRIN
+    document.getElementById('mulaSkrin').classList.add('sembunyi');
+    document.getElementById('tamatSkrin').classList.add('sembunyi');
+    document.getElementById('nilaiSkor').textContent = "0";
+    document.getElementById('nilaiMasa').textContent = "0";
 
-        k.restore();
-    };
+    // MULA LAGI DARI AWAL
+    berjalan = true;
+    masaMula = performance.now();
+    idGelung = requestAnimationFrame(gelungUtama);
+}
 
-    let buatHalanganBaru = () => {
-        let jenis = ["pokok", "kaktus", "pagar"][Math.floor(Math.random()*3)];
-        let ukuran = {
-            pokok: {l:36,t:52},
-            kaktus:{l:36,t:50},
-            pagar:{l:36,t:46}
-        }[jenis];
+function tamat(){
+    berjalan = false;
+    if(idGelung) cancelAnimationFrame(idGelung);
+    document.getElementById('tamatSkor').textContent = skor;
+    document.getElementById('tamatMasa').textContent = masaTerkini;
+    document.getElementById('tamatSkrin').classList.remove('sembunyi');
+}
 
-        senaraiHalangan.push({
-            x: kanv.width + 20,
-            y: parasTanah - ukuran.t,
-            w: ukuran.l, h: ukuran.t,
-            jenis: jenis
-        });
-    };
+// KAWALAN: SENTUH & KEKUNCI
+sentuh.addEventListener('touchstart',(e)=>{e.preventDefault();lompat();});
+sentuh.addEventListener('mousedown',lompat);
+document.addEventListener('keydown',(e)=>{if(e.code==="Space"){e.preventDefault();lompat();}});
 
-    let lompat = () => {
-        if(dino.diTanah && sedangMain){
-            dino.kelajuanLompat = -14.5;
-            dino.diTanah = false;
-            Bunyi.lompat();
-        }
-    };
+// BUTANG
+document.getElementById('btnMula').onclick = mulaBaru;
+document.getElementById('btnUlang').onclick = mulaBaru;
 
-    // --- LINGKARAN UTAMA & PEMBAIKAN MASA ---
-    let lingkaran = (masaSemasa) => {
-        if(!sedangMain) return;
-
-        // ✅ PEMBAIKAN UTAMA MASA & KELAJUAN
-        let masaLalu = masaSemasa - masaTerakhir;
-        masaTerakhir = masaSemasa;
-
-        // Kelajuan bertambah perlahan
-        kelajuanSemasa += pecutan;
-        if(kelajuanSemasa > kelajuanMaks) kelajuanSemasa = kelajuanMaks;
-
-        // Skor & ✅ MASA BERJALAN BETUL
-        jumlahSkor += Math.round(masaLalu / 16);
-        elSkor.textContent = `Skor: ${jumlahSkor}`;
-        
-        let saat = Math.floor((masaSemasa - masaMulaPermainan)/1000);
-        elMasa.textContent = `Masa: ${saat}s`;
-
-        // Fizik Lompat
-        if(!dino.diTanah){
-            dino.y += dino.kelajuanLompat;
-            dino.kelajuanLompat += dino.dayaTarik;
-            
-            if(dino.y + dino.tinggi >= parasTanah){
-                dino.y = parasTanah - dino.tinggi;
-                dino.diTanah = true;
-                dino.kelajuanLompat = 0;
-            }
-        }
-
-        // Jarak antara halangan
-        masaHalanganSeterusnya += masaLalu / 16;
-        let jarakMin = Math.max(65, 110 - kelajuanSemasa * 3.5);
-        if(masaHalanganSeterusnya > jarakMin){
-            buatHalanganBaru();
-            masaHalanganSeterusnya = 0;
-        }
-
-        // Gerakkan & bersihkan halangan lama
-        senaraiHalangan = senaraiHalangan.filter(h => {
-            h.x -= kelajuanSemasa * (masaLalu/16);
-            return h.x + h.w > -20;
-        });
-
-        // Perlanggaran
-        for(let h of senaraiHalangan){
-            let pengecilan = 9;
-            if(
-                dino.x + pengecilan < h.x + h.w - pengecilan &&
-                dino.x + dino.lebar - pengecilan > h.x + pengecilan &&
-                dino.y + dino.tinggi - pengecilan > h.y
-            ){
-                sedangMain = false;
-                Bunyi.hentam();
-                tamatPermainan(masaSemasa);
-                return;
-            }
-        }
-
-        k.clearRect(0,0,kanv.width,kanv.height);
-        lukisLatar();
-        senaraiHalangan.forEach(lukisHalangan);
-        lukisDinoCantik();
-
-        requestAnimationFrame(lingkaran);
-    };
-
-    let mulaPermainan = () => {
-        // Sembunyi semua
-        document.getElementById("skrinMula").classList.add("sembunyi");
-        document.getElementById("skrinTamat").classList.add("sembunyi");
-        document.getElementById("skrinPapan").classList.add("sembunyi");
-
-        saizSemula();
-        sedangMain = true;
-        jumlahSkor = 0;
-        kelajuanSemasa = kelajuanDasar; // Reset kelajuan perlahan
-        masaHalanganSeterusnya = 0;
-        senaraiHalangan = [];
-        
-        masaMulaPermainan = performance.now();
-        masaTerakhir = masaMulaPermainan;
-
-        elSkor.textContent = "Skor: 0";
-        elMasa.textContent = "Masa: 0s";
-        dino.x = 50; dino.y = parasTanah - dino.tinggi; dino.diTanah = true;
-
-        requestAnimationFrame(lingkaran);
-    };
-
-    let tamatPermainan = (masa) => {
-        let masaAkhir = Math.floor((masa - masaMulaPermainan)/1000);
-        document.getElementById("nilaiSkor").textContent = jumlahSkor;
-        document.getElementById("nilaiMasa").textContent = masaAkhir;
-        document.getElementById("skrinTamat").classList.remove("sembunyi");
-    };
-
-    let simpanRekod = async () => {
-        let nama = document.getElementById("namaPemain").value.trim() || "Anonim";
-        let masaAkhir = Math.floor((performance.now() - masaMulaPermainan)/1000);
-        
-        await rujukanSkor.push({
-            nama: nama, skor: jumlahSkor, masa: masaAkhir,
-            tarikh: new Date().toISOString()
-        });
-        alert("✅ Disimpan!");
-        paparkanPapan();
-    };
-
-    let paparkanPapan = () => {
-        ["skrinMula", "skrinTamat"].map(id=>document.getElementById(id).classList.add("sembunyi"));
-        document.getElementById("skrinPapan").classList.remove("sembunyi");
-        
-        if(pemantauData) rujukanSkor.off("value", pemantauData);
-        pemantauData = rujukanSkor.orderByChild("skor").limitToLast(10).on("value", data => {
-            let bekas = document.getElementById("isiSenarai"); bekas.innerHTML="";
-            if(!data.exists()){ bekas.innerHTML="<p class='p-5 text-center'>Tiada rekod</p>"; return; }
-            
-            let senarai = Object.values(data.val()).sort((a,b)=>b.skor - a.skor);
-            senarai.forEach((item, i)=>{
-                let baris = document.createElement("div");
-                baris.className = `barisRekod ${{0:'kedudukan1',1:'kedudukan2',2:'kedudukan3'}[i]||''}`;
-                baris.innerHTML = `<span>${i+1}. ${item.nama}</span><span>${item.skor} | ${item.masa||0}s</span>`;
-                bekas.appendChild(baris);
-            });
-        });
-    };
-    
-    let kembaliLaman = () => {
-        document.getElementById("skrinPapan").classList.add("sembunyi");
-        document.getElementById("skrinMula").classList.remove("sembunyi");
-        if(pemantauData){ rujukanSkor.off("value", pemantauData); pemantauData=null; }
-    };
-
-    // Kawalan Sentuh & Papan Kekunci
-    let ikatPeristiwa = () => {
-        let tekan = e => { e.preventDefault(); if(sedangMain) lompat(); };
-        sentuhKawasan.addEventListener("touchstart", tekan, {passive:false});
-        sentuhKawasan.addEventListener("mousedown", tekan);
-        kanv.addEventListener("touchstart", tekan, {passive:false});
-
-        document.addEventListener("keydown", (e)=>{
-            if(e.code === "Space" || e.code === "ArrowUp"){ e.preventDefault(); lompat(); }
-        });
-    };
-
-    // Butang
-    document.getElementById("mulaBtn").onclick = mulaPermainan;
-    document.getElementById("ulangBtn").onclick = mulaPermainan;
-    document.getElementById("simpanBtn").onclick = simpanRekod;
-    document.getElementById("papanBtn").onclick = paparkanPapan;
-    document.getElementById("rumahBtn").onclick = kembaliLaman;
-    document.getElementById("kembaliBtn").onclick = kembaliLaman;
-
-    // Mula sedia
-    saizSemula();
-    ikatPeristiwa();
-    lukisLatar();
-    lukisDinoCantik();
-    </script>
+// SAAT MULA-MULA LUKIS
+ubahSaiz(); lukisLatar(); lukisDino();
+window.addEventListener('resize',ubahSaiz);
+</script>
 </body>
 </html>
