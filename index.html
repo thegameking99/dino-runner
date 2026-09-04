@@ -1,207 +1,288 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>Dino Fix Muktamad</title>
-<style>
-* {margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:#111;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;}
-#kotak{width:min(96%,500px);height:min(70vh,500px);position:relative;border-radius:14px;overflow:hidden;}
-#kanvas{background:#a3d8ff;width:100%;height:100%;display:block;}
-#sentuh{position:absolute;inset:0;z-index:5;}
-#info{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;z-index:6;}
-.kotak-kecil{background:rgba(255,255,255,.9);padding:6px 14px;border-radius:10px;font-weight:bold;}
-.lindung{position:absolute;inset:0;background:rgba(0,0,0,.8);z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;gap:1rem;padding:1rem;}
-.sembunyi{display:none !important;}
-button{padding:.9rem 2rem;border:none;border-radius:12px;font-weight:bold;font-size:1.1rem;width:min(100%,280px);cursor:pointer;}
-.biru{background:#2563eb;color:#fff;}
-.hijau{background:#16a34a;color:#fff;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <title>Dino Runner - Stabil & Cantik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f172a;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 10px;
+        }
+        #gameWrap {
+            width: 100%; max-width: 500px;
+            height: 70vh; min-height: 400px;
+            border-radius: 16px; overflow: hidden;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0,0,0,.5);
+        }
+        #gameCanvas {
+            background: #bbdefb;
+            width: 100%; height: 100%;
+            display: block;
+        }
+        #touchArea {
+            position: absolute; inset: 0;
+            z-index: 10; cursor: pointer;
+        }
+        .hud {
+            position: absolute; top: 10px;
+            background: rgba(255,255,255,.9);
+            padding: 8px 16px; border-radius: 12px;
+            font-weight: bold; font-size: 1.1rem;
+            z-index: 20;
+        }
+        #scoreHud { left: 10px; }
+        #timeHud { right: 10px; }
+
+        .screen {
+            position: absolute; inset: 0;
+            background: rgba(15,23,42,.92);
+            z-index: 30;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            color: white; padding: 20px;
+        }
+        .hide { display: none !important; }
+
+        button {
+            border: none; border-radius: 12px;
+            padding: 14px 32px; margin: 8px auto;
+            font-size: 1.2rem; font-weight: bold;
+            width: 90%; max-width: 300px;
+            cursor: pointer;
+        }
+        .btn-blue { background: #2563eb; color:white; }
+        .btn-green { background: #16a34a; color:white; }
+        .btn-orange { background: #d97706; color:white; }
+        input {
+            padding: 12px; width: 90%; max-width:300px;
+            border-radius: 10px; border:none;
+            text-align:center; font-size:1.1rem; margin-bottom:15px;
+        }
+    </style>
 </head>
 <body>
+<div id="gameWrap">
+    <canvas id="gameCanvas"></canvas>
+    <div id="scoreHud" class="hud">Skor: 0</div>
+    <div id="timeHud" class="hud">Masa: 0s</div>
+    <div id="touchArea"></div>
 
-<div id="kotak">
-    <canvas id="kanvas"></canvas>
-    <div id="sentuh"></div>
-    <div id="info">
-        <div class="kotak-kecil">Skor: <span id="nilaiSkor">0</span></div>
-        <div class="kotak-kecil">Masa: <span id="nilaiMasa">0</span>s</div>
+    <div id="startScreen" class="screen">
+        <h1 class="text-3xl font-bold mb-4">🦖 DINO RUNNER</h1>
+        <p class="mb-2">👆 Ketuh skrin / Tekan Ruang untuk lompat</p>
+        <p class="mb-6 text-slate-300">Kelajuan bertambah perlahan</p>
+        <button id="startBtn" class="btn-blue">▶️ MULA</button>
     </div>
 
-    <div id="mulaSkrin" class="lindung">
-        <h2 style="font-size:1.6rem">🦖 KETUH SKRIN UNTUK LOMPAT</h2>
-        <button id="btnMula" class="biru">MULAI PERMAINAN</button>
-    </div>
-
-    <div id="tamatSkrin" class="lindung sembunyi">
-        <h2 style="color:#ff6b6b">TAMAT!</h2>
-        <p>Skor Akhir: <b id="tamatSkor">0</b></p>
-        <p>Masa: <b id="tamatMasa">0</b>s</p>
-        <button id="btnUlang" class="biru">🔄 MAIN SEMULA</button>
+    <div id="overScreen" class="screen hide">
+        <h2 class="text-2xl font-bold text-red-400 mb-4">TAMAT!</h2>
+        <p class="text-xl mb-1">Masa: <span id="resTime">0</span> s</p>
+        <p class="text-xl mb-4">Skor: <span id="resScore">0</span></p>
+        <input type="text" id="playerName" placeholder="Nama anda...">
+        <button id="saveBtn" class="btn-green">✅ Simpan</button>
+        <button id="restartBtn" class="btn-blue">🔄 Main Semula</button>
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
 <script>
-// UNSUR UTAMA
-const kanv = document.getElementById('kanvas');
-const k = kanv.getContext('2d');
-const kotak = document.getElementById('kotak');
-const sentuh = document.getElementById('sentuh');
+const firebaseConfig = {
+    apiKey: "AlzaSyDQ_MoqFHsVIpfq8YefgToN1S9j-p8mRv0",
+    authDomain: "dino-runner-scores.firebaseapp.com",
+    databaseURL: "https://dino-runner-scores-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "dino-runner-scores"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-// PEMBOLEH UBAH - SENTIASA DIRESET SEPENUHNYA
-let berjalan = false;
-let masaMula = 0;
-let masaTerkini = 0;
-let skor = 0;
-let tanahY = 0;
-let halangan = [];
-let kelajuan = 3.5;
-let idGelung = null;
+// Unsur & Kanvas
+const c = document.getElementById('gameCanvas');
+const ctx = c.getContext('2d');
+const wrap = document.getElementById('gameWrap');
+const touch = document.getElementById('touchArea');
 
-// OBJEK DINO - MUDAH & TETAP KELIHATAN
+// Pemboleh ubah Permainan - DIRESET DENGAN BETUL
+let running = false;
+let score = 0;
+let timeSec = 0;
+let lastTime = 0;
+let groundY = 0;
+let speed = 3.5;
+let obstacles = [];
+let animFrame = null;
+
+// Dino Mudah & Jelas - Sentiasa Kelihatan
 const dino = {
-    x: 50, l: 40, t: 45, y: 0,
-    lompatKuat: -14, tarikan: 0.7, lajuY: 0, diTanah: true
+    x: 50, w: 44, h: 48, y: 0,
+    vy: 0, jumpPower: -13, gravity: 0.65,
+    onGround: true
 };
 
-// SAIZ KANVAS
-function ubahSaiz(){
-    kanv.width = kotak.clientWidth;
-    kanv.height = kotak.clientHeight;
-    tanahY = kanv.height - 50;
-    dino.y = tanahY - dino.t;
+// Saiz & Latar
+function resize() {
+    c.width = wrap.clientWidth;
+    c.height = wrap.clientHeight;
+    groundY = c.height - 50;
+    dino.y = groundY - dino.h;
 }
 
-// LUKIS DINO JELAS & TIDAK PELIK
-function lukisDino(){
-    k.fillStyle="#22bb55";
-    k.fillRect(dino.x+6, dino.y+12, 26, 22);
-    k.beginPath(); k.arc(dino.x+30, dino.y+15, 11, 0, Math.PI*2); k.fill();
+// Lukis Dino Rapi & Mudah
+function drawDino() {
+    ctx.fillStyle = "#22c55e";
+    ctx.fillRect(dino.x+8, dino.y+14, 28, 24); // Badan
+    ctx.beginPath(); ctx.arc(dino.x+32, dino.y+16, 13, 0, Math.PI*2); ctx.fill(); // Kepala
     
-    k.fillStyle="#fff";
-    k.beginPath(); k.arc(dino.x+35, dino.y+11, 5, 0, Math.PI*2); k.fill();
-    k.fillStyle="#000";
-    k.beginPath(); k.arc(dino.x+36, dino.y+12, 2, 0, Math.PI*2); k.fill();
-
-    k.fillStyle="#157d32";
-    k.fillRect(dino.x+8, dino.y+34, 5, 11);
-    k.fillRect(dino.x+25, dino.y+34, 5, 11);
+    ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(dino.x+38,dino.y+12,5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="#000"; ctx.beginPath(); ctx.arc(dino.x+39,dino.y+13,2,0,Math.PI*2); ctx.fill();
+    
+    ctx.fillStyle="#15803d";
+    ctx.fillRect(dino.x+10, dino.y+36, 6, 12); // Kaki
+    ctx.fillRect(dino.x+28, dino.y+36, 6, 12);
 }
 
-// LATAR & TANAH
-function lukisLatar(){
-    k.clearRect(0,0,kanv.width,kanv.height);
-    k.fillStyle="#a3d8ff"; k.fillRect(0,0,kanv.width,kanv.height);
-    k.fillStyle="#7a4514"; k.fillRect(0,tanahY,kanv.width,50);
-    k.fillStyle="#239b33"; k.fillRect(0,tanahY,kanv.width,5);
+// Halangan & Tanah
+function drawBg() {
+    ctx.fillStyle="#bbdefb"; ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle="#8b4513"; ctx.fillRect(0,groundY,c.width,50);
+    ctx.fillStyle="#2e7d32"; ctx.fillRect(0,groundY,c.width,6);
 }
 
-// HALANGAN
-function buatHalangan(){
-    halangan.push({
-        x: kanv.width + 20,
-        y: tanahY - 42,
-        l: 20, t: 42
+function drawObstacles() {
+    obstacles.forEach(h => {
+        ctx.fillStyle="#5d4037";
+        if(h.type==="cactus") {
+            ctx.fillRect(h.x,h.y,h.w,h.h);
+            ctx.fillRect(h.x-h.w/2,h.y+h.h*0.2,h.w*1.5,h.h*0.2);
+        } else {
+            ctx.fillRect(h.x,h.y,h.w,h.h);
+        }
     });
 }
 
-function lukisHalangan(){
-    halangan.forEach(h=>{
-        k.fillStyle="#5c3c18";
-        k.fillRect(h.x,h.y,h.l,h.t);
+function spawnObstacle() {
+    const types = ["cactus", "cactus"];
+    let w = 22 + Math.random()*8;
+    let h = 38 + Math.random()*18;
+    obstacles.push({
+        x: c.width + 30,
+        y: groundY - h,
+        w: w, h: h,
+        type: types[Math.floor(Math.random()*types.length)]
     });
 }
 
-// LOMPAT
-function lompat(){
-    if(dino.diTanah && berjalan){
-        dino.lajuY = dino.lompatKuat;
-        dino.diTanah = false;
+// Lompat
+function jump() {
+    if(dino.onGround && running) {
+        dino.vy = dino.jumpPower;
+        dino.onGround = false;
     }
 }
 
-// GELUNG UTAMA - DIREKA SUPAYA TIDAK ROSAK BILA DIULANG
-function gelungUtama(masa){
-    if(!berjalan) return;
+// LINGKARAN UTAMA - TIDAK GANJIL BILA DIULANG
+function loop(timestamp) {
+    if(!running) return;
 
-    // KIRAAN LICIN & TEPAT
-    masaTerkini = Math.floor((masa - masaMula)/1000);
-    skor += 1; // Kadar skor stabil
-    document.getElementById('nilaiSkor').textContent = skor;
-    document.getElementById('nilaiMasa').textContent = masaTerkini;
+    // ✅ Kiraan Masa & Skor SEIMBANG
+    let dt = timestamp - lastTime;
+    lastTime = timestamp;
+
+    // Kemas kini Masa & Skor berasingan
+    score += Math.round(dt / 50); // Skor perlahan & munasabah
+    timeSec = Math.floor(timestamp / 1000);
+
+    document.getElementById("scoreHud").textContent = "Skor: " + score;
+    document.getElementById("timeHud").textContent = "Masa: " + timeSec + "s";
 
     // Kelajuan perlahan
-    kelajuan += 0.003;
+    speed += 0.002;
 
-    // Fizik Dino
-    dino.lajuY += dino.tarikan;
-    dino.y += dino.lajuY;
-    if(dino.y + dino.t >= tanahY){
-        dino.y = tanahY - dino.t;
-        dino.diTanah = true;
-        dino.lajuY = 0;
+    // Fizik Lompat
+    dino.vy += dino.gravity;
+    dino.y += dino.vy;
+    if(dino.y + dino.h >= groundY) {
+        dino.y = groundY - dino.h;
+        dino.vy = 0; dino.onGround = true;
     }
 
-    // Halangan & jarak
-    halangan = halangan.filter(h=>{h.x -= kelajuan; return h.x > -40;});
-    if(halangan.length === 0 || halangan[halangan.length-1].x < kanv.width - 160){
-        buatHalangan();
+    // Halangan
+    obstacles = obstacles.filter(o => { o.x -= speed; return o.x > -60; });
+    if(!obstacles.length || obstacles[obstacles.length-1].x < c.width - (140+Math.random()*120)) spawnObstacle();
+
+    // Perlanggaran
+    for(let o of obstacles) {
+        if( dino.x+6 < o.x+o.w && dino.x+dino.w-6 > o.x &&
+            dino.y+8 < o.y+o.h && dino.y+dino.h > o.y ) {
+            gameOver(); return;
+        }
     }
 
-    // PERLANGGARAN
-    for(let h of halangan){
-        if( dino.x+6 < h.x+h.l && dino.x+dino.l-6 > h.x &&
-            dino.y+4 < h.y+h.t && dino.y+dino.t > h.y ){ tamat(); return; }
-    }
+    ctx.clearRect(0,0,c.width,c.height);
+    drawBg(); drawObstacles(); drawDino();
 
-    lukisLatar(); lukisHalangan(); lukisDino();
-    idGelung = requestAnimationFrame(gelungUtama);
+    animFrame = requestAnimationFrame(loop);
 }
 
-// MULA / MULA SEMULA: PADAM SEGALA-GALANYA DULU
-function mulaBaru(){
-    // HENTIKAN & PADAM LAMA DULU
-    if(idGelung) cancelAnimationFrame(idGelung);
+// MULA / MULA SEMULA - ✅ SEMUA DIRESET SEPENUHNYA
+function startGame() {
+    // Hentikan gelung lama jika ada
+    if(animFrame) cancelAnimationFrame(animFrame);
+    
+    // Sembunyi skrin
+    document.getElementById("startScreen").classList.add("hide");
+    document.getElementById("overScreen").classList.add("hide");
 
-    // SEMUA DIKOSONGKAN & DIRESET MUTLAK
-    berjalan = false; skor = 0; masaTerkini = 0;
-    halangan = []; kelajuan = 3.5;
-    ubahSaiz();
-    dino.x = 50; dino.y = tanahY - dino.t; dino.lajuY = 0; dino.diTanah = true;
-
-    // SKRIN
-    document.getElementById('mulaSkrin').classList.add('sembunyi');
-    document.getElementById('tamatSkrin').classList.add('sembunyi');
-    document.getElementById('nilaiSkor').textContent = "0";
-    document.getElementById('nilaiMasa').textContent = "0";
-
-    // MULA LAGI DARI AWAL
-    berjalan = true;
-    masaMula = performance.now();
-    idGelung = requestAnimationFrame(gelungUtama);
+    // SET SEMULA KEADAAN PENUH
+    resize();
+    score = 0; timeSec = 0; speed = 3.5;
+    obstacles = [];
+    dino.x = 50; dino.y = groundY - dino.h;
+    dino.vy = 0; dino.onGround = true;
+    
+    running = true;
+    lastTime = performance.now();
+    animFrame = requestAnimationFrame(loop);
 }
 
-function tamat(){
-    berjalan = false;
-    if(idGelung) cancelAnimationFrame(idGelung);
-    document.getElementById('tamatSkor').textContent = skor;
-    document.getElementById('tamatMasa').textContent = masaTerkini;
-    document.getElementById('tamatSkrin').classList.remove('sembunyi');
+function gameOver() {
+    running = false;
+    if(animFrame) cancelAnimationFrame(animFrame);
+    
+    document.getElementById("resScore").textContent = score;
+    document.getElementById("resTime").textContent = timeSec;
+    document.getElementById("overScreen").classList.remove("hide");
 }
 
-// KAWALAN: SENTUH & KEKUNCI
-sentuh.addEventListener('touchstart',(e)=>{e.preventDefault();lompat();});
-sentuh.addEventListener('mousedown',lompat);
-document.addEventListener('keydown',(e)=>{if(e.code==="Space"){e.preventDefault();lompat();}});
+function saveRecord() {
+    db.ref("scores").push({
+        name: document.getElementById("playerName").value || "Tetamu",
+        score: score, time: timeSec
+    }).then(()=>alert("✅ Disimpan!"));
+}
 
-// BUTANG
-document.getElementById('btnMula').onclick = mulaBaru;
-document.getElementById('btnUlang').onclick = mulaBaru;
+// Kawalan Sentuh & Papan Kekunci
+touch.addEventListener("touchstart", e=>{e.preventDefault(); jump();});
+touch.addEventListener("mousedown", jump);
+document.addEventListener("keydown", e=>{ if(e.code==="Space") {e.preventDefault(); jump();} });
 
-// SAAT MULA-MULA LUKIS
-ubahSaiz(); lukisLatar(); lukisDino();
-window.addEventListener('resize',ubahSaiz);
+// Butang
+document.getElementById("startBtn").onclick = startGame;
+document.getElementById("restartBtn").onclick = startGame;
+document.getElementById("saveBtn").onclick = saveRecord;
+
+// Sedia Mula Pertama Kali
+resize();
+drawBg(); drawDino();
+window.addEventListener("resize", ()=>{resize(); drawBg(); drawDino();});
 </script>
 </body>
 </html>
