@@ -2,14 +2,14 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Dino Runner - Lompat Halangan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- 🔧 PENTING: HALANG SIMPAN SALINAN LAMA / CACHE -->
+    <!-- Elak Cache -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
+    <title>Dino Runner - Lompat Halangan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -18,57 +18,106 @@
     </script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-        body { font-family:'Segoe UI', sans-serif; overflow:hidden; touch-action:none; }
-        #gameCanvas { display:block; margin:0 auto; background:linear-gradient(#87ceeb, #e0f2fe); }
-        .skrin { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; background:rgba(15,23,42,0.85); color:white; padding:1rem; }
+        html, body { 
+            height:100%; 
+            overflow:hidden; 
+            touch-action:none; 
+            touch-action:manipulation; 
+            font-family:'Segoe UI', sans-serif;
+        }
+        body { 
+            display:flex; 
+            flex-direction:column; 
+            align-items:center; 
+            justify-content:center; 
+            background:#020617;
+            padding:0; margin:0;
+        }
+        #gameContainer { 
+            position:relative; 
+            width:100%; 
+            max-width:900px; 
+            height:min(70vh, 520px);
+            border-radius:12px; 
+            overflow:hidden; 
+            box-shadow:0 0 40px rgba(34,197,94,0.15);
+        }
+        #gameCanvas { 
+            display:block; 
+            width:100%; 
+            height:100%; 
+            background:linear-gradient(#87ceeb, #e0f2fe);
+            touch-action:manipulation;
+        }
+        .skrin { 
+            position:absolute; inset:0; 
+            display:flex; flex-direction:column; justify-content:center; align-items:center; 
+            background:rgba(15,23,42,0.88); color:white; padding:1.5rem; z-index:10;
+        }
         .sembunyi { display:none !important; }
-        .btn { background:#2563eb; border:none; padding:0.8rem 2rem; border-radius:10px; font-weight:bold; font-size:1.1rem; color:white; margin:0.5rem; cursor:pointer; transition:transform .15s; }
-        .btn:active { transform:scale(0.95); }
-        .input { padding:0.75rem; border-radius:8px; border:none; width:min(85%,280px); font-size:1rem; color:#111; }
-        .baris { display:flex; justify-content:space-between; width:100%; padding:.6rem 1rem; border-bottom:1px solid #334155; }
+        .btn { 
+            background:#2563eb; border:none; padding:0.9rem 2.2rem; border-radius:12px; 
+            font-weight:bold; font-size:1.15rem; color:white; margin:0.6rem; cursor:pointer; 
+            transition:transform .15s, scale .15s; width:min(100%, 280px);
+            box-shadow:0 4px 12px rgba(0,0,0,.25);
+        }
+        .btn:active { transform:scale(0.94); }
+        .btn-amber { background:#d97706; }
+        .btn-hijau { background:#16a34a; }
+        .input { 
+            padding:0.85rem; border-radius:10px; border:none; width:min(100%,290px); 
+            font-size:1rem; color:#111; margin-bottom:1rem; text-align:center;
+        }
+        .baris { display:flex; justify-content:space-between; width:100%; padding:.7rem 1rem; border-bottom:1px solid #334155; gap:1rem;}
         .ke-1{background:#ca8a04; color:#fff; font-weight:bold;}
-        .ke-2{background:#64748b;}
-        .ke-3{background:#78350f;}
+        .ke-2{background:#64748b; color:#fff; font-weight:bold;}
+        .ke-3{background:#78350f; color:#fff; font-weight:bold;}
         #senaraiSkor { width:min(95%,450px); max-height:55vh; overflow-y:auto; background:#1e293b; border-radius:12px; margin:1rem 0; }
-        .tajuk { text-align:center; font-size:1.4rem; font-weight:bold; padding:.8rem; background:#0f172a; border-radius:12px 12px 0 0; }
+        .tajuk { text-align:center; font-size:1.4rem; font-weight:bold; padding:.9rem; background:#0f172a; border-radius:12px 12px 0 0; }
+        #sentuhPerintang { position:absolute; inset:0; z-index:5; cursor:pointer; }
     </style>
 </head>
-<body class="bg-slate-900">
-    <canvas id="gameCanvas"></canvas>
-    <!-- MULA -->
-    <div id="mulaSkrin" class="skrin">
-        <h1 class="text-3xl font-bold mb-4">🦖 Dino Runner</h1>
-        <p class="mb-6 text-center text-slate-200">Ketuh skrin untuk lompat<br>Lama bertahan = Skor tinggi!</p>
-        <button id="btnMula" class="btn">MULAI PERMAINAN</button>
-        <button id="btnPapan" class="btn bg-amber-600">🏆 Papan Skor</button>
-    </div>
-    <!-- TAMAT -->
-    <div id="tamatSkrin" class="skrin sembunyi">
-        <h2 class="text-2xl font-bold mb-2 text-red-400">PERMAINAN TAMAT</h2>
-        <p class="mb-1">Masa Dimain: <span id="masaTamat">0</span>s</p>
-        <p class="mb-4 text-xl font-semibold">Skor: <span id="skorTamat" class="text-yellow-300">0</span></p>
-        <input type="text" id="namaPemain" class="input" placeholder="Masukkan nama anda..." maxlength="16">
-        <button id="btnSimpan" class="btn bg-green-600">✅ Simpan Skor</button>
-        <button id="btnUlang" class="btn">🔄 Main Semula</button>
-        <button id="btnUtama" class="btn bg-slate-600">🏠 Laman Utama</button>
-    </div>
-    <!-- PAPAN SKOR -->
-    <div id="papanSkrin" class="skrin sembunyi">
-        <div id="senaraiSkor">
-            <div class="tajuk">10 TERATAS</div>
-            <div id="isiPapan"></div>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        <!-- Lapisan sentuh tambahan -->
+        <div id="sentuhPerintang"></div>
+
+        <!-- Skrin Mula -->
+        <div id="mulaSkrin" class="skrin">
+            <h1 class="text-3xl font-bold mb-4">🦖 Dino Runner</h1>
+            <p class="mb-2 text-center text-slate-200">Ketuh mana-mana untuk lompat</p>
+            <p class="mb-6 text-center text-slate-300 text-sm">Lama bertahan = Skor tinggi!</p>
+            <button id="btnMula" class="btn">MULAI PERMAINAN</button>
+            <button id="btnPapan" class="btn btn-amber">🏆 Papan Skor</button>
         </div>
-        <button id="kembaliUtama" class="btn">KEMBALI</button>
+
+        <!-- Skrin Tamat -->
+        <div id="tamatSkrin" class="skrin sembunyi">
+            <h2 class="text-2xl font-bold mb-2 text-red-400">PERMAINAN TAMAT</h2>
+            <p class="mb-1">Masa: <span id="masaTamat">0</span> saat</p>
+            <p class="mb-4 text-xl font-semibold">Skor: <span id="skorTamat" class="text-yellow-300">0</span></p>
+            <input type="text" id="namaPemain" class="input" placeholder="Nama anda..." maxlength="16">
+            <button id="btnSimpan" class="btn btn-hijau">✅ Simpan Skor</button>
+            <button id="btnUlang" class="btn">🔄 Main Semula</button>
+            <button id="btnUtama" class="btn bg-slate-600">🏠 Laman Utama</button>
+        </div>
+
+        <!-- Papan Skor -->
+        <div id="papanSkrin" class="skrin sembunyi">
+            <div id="senaraiSkor">
+                <div class="tajuk">🏆 10 TERATAS</div>
+                <div id="isiPapan"></div>
+            </div>
+            <button id="kembaliUtama" class="btn">KEMBALI KE MULA</button>
+        </div>
     </div>
 
-    <!-- FIREBASE & PERPUSTAKAAN SERASI -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     
     <script>
-    // ==========================================
-    // KONFIGURASI FIREBASE ANDA (SUDAH BETUL)
-    // ==========================================
     const firebaseConfig = {
       apiKey: "AlzaSyDQ_MoqFHsVIpfq8YefgToN1S9j-p8mRv0",
       authDomain: "dino-runner-scores.firebaseapp.com",
@@ -79,193 +128,137 @@
       appId: "1:245416612085:web:ebc76f43b983c9072fb5bc"
     };
 
-    // MULA SISTEM PANGKALAN DATA
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const skorRef = db.ref("skor");
-    let pendengarSkor = null; // KAWAL PENDENGAR: ELAK DATA LAMA & BERGANDA
+    let pendengarSkor = null;
 
-    // SISTEM BUNYI MUDAH
+    // Bunyi
     const Bunyi = {
-        main: ()=>{const a=new AudioContext();a.resume();a.createOscillator().connect(a.destination).start()},
-        lompat: ()=>{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g),g.connect(a.destination),o.frequency.value=500,g.gain.value=.08;o.start();o.frequency.exponentialRampToValueAtTime(900,a.currentTime+.12),g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.15)},
-        langgar: ()=>{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g),g.connect(a.destination),o.type="sawtooth",o.frequency.value=220,g.gain.value=.12;o.start();o.frequency.exponentialRampToValueAtTime(60,a.currentTime+.3)},
-        tamat: ()=>{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g),g.connect(a.destination),o.frequency.value=300;[300,250,180].forEach((f,i)=>setTimeout(()=>o.frequency.value=f,i*160));g.gain.value=.1;o.start();o.stop(a.currentTime+.5);}
+        lompat: ()=>{try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.connect(g),g.connect(a.destination);o.frequency.value=520;g.gain.value=.1;o.start();o.frequency.exponentialRampToValueAtTime(880,a.currentTime+.12);g.gain.exponentialRampToValueAtTime(.01,a.currentTime+.15);}catch(e){}},
+        hentam: ()=>{try{const a=new AudioContext(),o=a.createOscillator(),g=a.createGain();o.type="sawtooth";o.connect(g),g.connect(a.destination);o.frequency.value=150;g.gain.value=.15;o.start();o.stop(a.currentTime+.25);}catch(e){}}
     };
 
-    // KANVAS & ELEMEN ANTARAMUKA
-    const c=document.getElementById("gameCanvas");
-    const ctx=c.getContext("2d");
-    function ubahSaiz(){c.width=Math.min(window.innerWidth,900);c.height=Math.min(window.innerHeight,520);}
-    ubahSaiz();
-    window.addEventListener("resize",ubahSaiz);
+    // Elemen
+    const c=document.getElementById("gameCanvas"), ctx=c.getContext("2d");
+    const bekas=document.getElementById("gameContainer");
+    const sentuhEl=document.getElementById("sentuhPerintang");
+    const skrinMula=document.getElementById("mulaSkrin"), skrinTamat=document.getElementById("tamatSkrin"), skrinPapan=document.getElementById("papanSkrin");
+    const isiPapan=document.getElementById("isiPapan");
 
-    let sedangMain=false, masaMula=0, masaLalu=0, skor=0, kelajuan=5, tanahY=0;
+    let sedangMain=false, masaLalu=0, skor=0, kelajuan=5, tanahY=0;
     let dino={x:80,y:0,w:44,h:55,lompatK:0,diTanah:true};
     let halangan=[], halangMasa=0;
-    
-    let skrinMula=document.getElementById("mulaSkrin");
-    let skrinTamat=document.getElementById("tamatSkrin");
-    let skrinPapan=document.getElementById("papanSkrin");
-    let isiPapan=document.getElementById("isiPapan");
 
-    // FUNGSI LUKISAN
-    function lukisTanah(){tanahY=c.height-50;ctx.fillStyle="#1e293b";ctx.fillRect(0,tanahY,c.width,50);}
-    function lukisDino(){ctx.fillStyle="#22c55e";ctx.fillRect(dino.x,dino.y,dino.w,dino.h);ctx.fillStyle="#fff";ctx.fillRect(dino.x+8,dino.y+8,9,9);ctx.fillStyle="#000";ctx.fillRect(dino.x+11,dino.y+11,4,4);}
-    function lukisHalang(h){ctx.fillStyle=h.jenis==="pokok"?("#15803d"):("maroon");ctx.fillRect(h.x,h.y,h.w,h.h);}
-    
+    // Saiz Kanvas Tepat
+    function tetapkanSaiz(){
+        const lebar=bekas.clientWidth;
+        const tinggi=bekas.clientHeight;
+        c.width=lebar * window.devicePixelRatio || lebar;
+        c.height=tinggi * window.devicePixelRatio || tinggi;
+        ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
+        tanahY=tinggi - 50;
+        dino.y=tanahY - dino.h;
+    }
+    window.addEventListener("resize", tetapkanSaiz);
+
+    // Lukisan
+    function lukisLatar(){
+        const w=bekas.clientWidth, h=bekas.clientHeight;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle="#87CEEB"; ctx.fillRect(0,0,w,h);
+        ctx.fillStyle="#166534"; ctx.fillRect(0,tanahY,w,50);
+    }
+    function lukisDino(){
+        ctx.fillStyle="#22c55e"; ctx.fillRect(dino.x,dino.y,dino.w,dino.h);
+        ctx.fillStyle="#fff"; ctx.fillRect(dino.x+8,dino.y+8,9,9);
+        ctx.fillStyle="#000"; ctx.fillRect(dino.x+11,dino.y+11,4,4);
+    }
     function buatHalang(){
-        const jenis=["pokok","kaktus","pagar"][Math.floor(Math.random()*3)];
-        let w=jenis==="pokok"?30:(jenis==="kaktus"?22:38);
-        halangan.push({x:c.width+40,y:tanahY-(jenis==="pagar"?40:50),w:w,h:jenis==="pagar"?40:50,jenis});
+        const jenis=["pokok","kaktus","batu"][Math.floor(Math.random()*3)];
+        halangan.push({x:bekas.clientWidth+20,y:tanahY-45,w:30,h:45,jenis});
     }
+    function lukisHalang(h){ ctx.fillStyle="#92400e"; ctx.fillRect(h.x,h.y,h.w,h.h); }
 
-    // GELUNG PERMAINAN UTAMA
-    function kemasKeadaan(t){
+    // Gelung Utama
+    function gelung(t){
         if(!sedangMain) return;
-        
-        let dT=(t-masaLalu)/16; 
-        masaLalu=t;
-        kelajuan=5+Math.floor(skor/25);
-        
-        // Logik Lompatan & Graviti
+        const dT=(t-masaLalu)/16; masaLalu=t;
+        skor+=Math.round(dT/3); kelajuan=Math.min(12, 5+skor/60);
+
+        // Lompat/Graviti
         if(!dino.diTanah){
-            dino.lompatK+=1.1*dT; 
-            dino.y+=dino.lompatK*dT; 
-            if(dino.y+dino.h>=tanahY){
-                dino.y=tanahY-dino.h; 
-                dino.diTanah=true; 
-                dino.lompatK=0;
+            dino.lompatK += 1.1*dT; dino.y += dino.lompatK*dT;
+            if(dino.y+dino.h >= tanahY){
+                dino.y=tanahY-dino.h; dino.diTanah=true; dino.lompatK=0;
             }
         }
-        
-        // Hasilkan & Gerakkan Halangan
-        halangMasa+=dT; 
-        if(halangMasa>Math.max(35,70-kelajuan*2)){
-            buatHalang(); 
-            halangMasa=0;
-        }
-        halangan=halangan.filter(h=>{h.x-=kelajuan*dT; return h.x+h.w>0;});
-        
-        // Semak Perlanggaran
+
+        halangMasa+=dT; if(halangMasa>65){ buatHalang(); halangMasa=0; }
+        halangan=halangan.filter(h=>{h.x-=kelajuan*dT; return h.x>-50;});
+
+        // Langgar
         for(let h of halangan){
-            if(dino.x+dino.w-8>h.x && dino.x+8 <h.x+h.w && dino.y+dino.h-8>h.y){
-                sedangMain=false; 
-                Bunyi.langgar(); 
-                Bunyi.tamat(); 
-                tamatMain(); 
-                return;
+            if(dino.x+6 <h.x+h.w && dino.x+dino.w-6>h.x && dino.y+dino.h>h.y){
+                sedangMain=false; Bunyi.hentam(); tamatMain(); return;
             }
         }
 
-        // Kemas & Lukis Semula
-        skor+=Math.round(dT/4);
-        ctx.clearRect(0,0,c.width,c.height);
-        lukisTanah(); 
-        lukisDino(); 
-        halangan.forEach(lukisHalang);
-        ctx.font="bold 18px sans-serif"; 
-        ctx.fillStyle="#fff";
-        ctx.shadowColor="#000"; ctx.shadowBlur=2;
-        ctx.fillText(`Skor: ${skor}`,15,30); 
-        ctx.fillText(`Masa: ${((t-masaMula)/1000).toFixed(1)}s`,15,55);
-        ctx.shadowBlur=0;
+        lukisLatar(); lukisDino(); halangan.forEach(lukisHalang);
+        ctx.font="bold 18px sans-serif"; ctx.fillStyle="#1e293b";
+        ctx.fillText(`Skor: ${skor}`,16,28);
+        requestAnimationFrame(gelung);
+    }
 
-        requestAnimationFrame(kemasKeadaan);
-    }
-    
-    // FUNGSI KAWALAN
-    function lompat(){if(dino.diTanah&&sedangMain){dino.lompatK=-14; dino.diTanah=false; Bunyi.lompat();}}
-    
+    function lompat(){ if(dino.diTanah && sedangMain){ dino.lompatK=-14; dino.diTanah=false; Bunyi.lompat(); } }
     function mulaMain(){
-        skrinMula.classList.add("sembunyi");
-        skrinTamat.classList.add("sembunyi");
-        skrinPapan.classList.add("sembunyi");
-        sedangMain=true;
-        masaLalu=performance.now();
-        masaMula=masaLalu;
-        skor=0;
-        halangan=[];
-        dino.x=80;
-        dino.y=(c.height-50)-dino.h;
-        dino.diTanah=true;
-        Bunyi.main();
-        requestAnimationFrame(kemasKeadaan);
+        skrinMula.classList.add("sembunyi"); skrinTamat.classList.add("sembunyi"); skrinPapan.classList.add("sembunyi");
+        tetapkanSaiz(); sedangMain=true; masaLalu=performance.now(); skor=0; halangan=[]; halangMasa=0;
+        dino.x=60; dino.y=tanahY-dino.h; dino.diTanah=true;
+        requestAnimationFrame(gelung);
     }
-    
     function tamatMain(){
         document.getElementById("skorTamat").textContent=skor;
-        document.getElementById("masaTamat").textContent=((performance.now()-masaMula)/1000).toFixed(1);
+        document.getElementById("masaTamat").textContent=Math.floor((performance.now()-masaLalu)/1000);
         skrinTamat.classList.remove("sembunyi");
     }
-    
     async function simpanSkor(){
-        let nama=document.getElementById("namaPemain").value.trim()||"Anonim";
-        await skorRef.push({nama:nama,skor:skor,tarikh:new Date().toISOString()});
-        alert("✅ Disimpan ke Papan Skor!"); 
-        bukaPapan();
+        const nama=(document.getElementById("namaPemain").value||"Anonim").trim();
+        await skorRef.push({nama,skor,tarikh:new Date().toISOString()}); alert("✅ Disimpan!"); bukaPapan();
     }
 
-    // PAPAN SKOR: LOGIK PENTING - ELAK DUPLIKAT / DATA LAMA
     function bukaPapan(){
-        skrinMula.classList.add("sembunyi"); 
-        skrinTamat.classList.add("sembunyi"); 
-        skrinPapan.classList.remove("sembunyi");
-        
-        // ✅ LANGKAH 1: PUTUSKAN PENDENGAR LAMA JIKA ADA
-        if(pendengarSkor) skorRef.off("value",pendengarSkor); 
-        
-        // ✅ LANGKAH 2: PASANG YANG BARU & KOSONG SENARAI SETIAP MASA
-        pendengarSkor=skorRef.orderByChild("skor").limitToLast(10).on("value",(snap)=>{
-            isiPapan.innerHTML=""; 
-            if(!snap.exists()){isiPapan.innerHTML="<p class='p-4 text-center text-slate-300'>Belum ada rekod</p>";return;}
-            
-            // Susun: Skor tinggi ke bawah
-            let data=Object.values(snap.val()).sort((a,b)=>b.skor-a.skor); 
-            data.forEach((p,i)=>{
-                const el=document.createElement("div");
-                el.className=`baris ${i<3?"ke-"+(i+1):""}`;
-                el.innerHTML=`<span>${i+1}. ${p.nama||"Pemain"}</span><span class="font-mono">${p.skor}</span>`;
-                isiPapan.appendChild(el);
-            });
-        },(err)=>isiPapan.innerHTML="<p class='p-3 text-red-300'>Ralat: "+err.message+"</p>");
+        skrinMula.classList.add("sembunyi"); skrinTamat.classList.add("sembunyi"); skrinPapan.classList.remove("sembunyi");
+        if(pendengarSkor) skorRef.off("value",pendengarSkor);
+        pendengarSkor=skorRef.orderByChild("skor").limitToLast(10).on("value",s=>{
+            isiPapan.innerHTML=""; if(!s.exists()){isiPapan.innerHTML="<p class='p-4 text-center'>Tiada rekod</p>";return;}
+            const data=Object.values(s.val()).sort((a,b)=>b.skor-a.skor);
+            data.forEach((p,i)=>{const el=document.createElement("div");el.className=`baris ke-${i+1<=3?i+1:""}`;el.innerHTML=`<span>${i+1}. ${p.nama}</span><span>${p.skor}</span>`;isiPapan.appendChild(el);});
+        });
     }
-    
-    function tutupPapan(){
-        skrinPapan.classList.add("sembunyi");
-        skrinMula.classList.remove("sembunyi");
-        // ✅ Bersihkan rujukan untuk elak kebocoran ingatan/sisa
-        if(pendengarSkor){ 
-            skorRef.off("value",pendengarSkor); 
-            pendengarSkor=null; 
-        }
+    function tutupPapan(){ skrinPapan.classList.add("sembunyi"); skrinMula.classList.remove("sembunyi"); if(pendengarSkor){ skorRef.off(); pendengarSkor=null;} }
+
+    // ✅ KAWALAN SENTUH YANG PASTI BERFUNGSI
+    function ikatKawalan(){
+        const lompatFn=(e)=>{
+            if(e) e.preventDefault();
+            lompat();
+        };
+        sentuhEl.addEventListener("touchstart", lompatFn, {passive:false});
+        sentuhEl.addEventListener("mousedown", lompatFn);
+        c.addEventListener("touchstart", lompatFn, {passive:false});
+        document.addEventListener("keydown",e=>{if(e.code==="Space"||e.code==="ArrowUp"){e.preventDefault();if(sedangMain)lompat();}});
     }
 
-    // KAWALAN PERANTI: Sentuh, Tetikus & Papan Kekunci
-    document.addEventListener("touchstart", (e)=>{
-        e.preventDefault();
-        if(sedangMain) lompat();
-    }, {passive: false});
-    
-    document.addEventListener("mousedown", ()=>{ if(sedangMain) lompat(); });
-    
-    document.addEventListener("keydown", (e)=>{
-        if(e.code==="Space" || e.code==="ArrowUp"){
-            e.preventDefault();
-            if(sedangMain) lompat();
-        }
-    });
+    // Butang
+    document.getElementById("btnMula").onclick=mulaMain;
+    document.getElementById("btnUlang").onclick=mulaMain;
+    document.getElementById("btnSimpan").onclick=simpanSkor;
+    document.getElementById("btnPapan").onclick=bukaPapan;
+    document.getElementById("btnUtama").onclick=tutupPapan;
+    document.getElementById("kembaliUtama").onclick=tutupPapan;
 
-    // PENGIKATAN BUTANG
-    document.getElementById("btnMula").onclick = mulaMain;
-    document.getElementById("btnUlang").onclick = mulaMain;
-    document.getElementById("btnSimpan").onclick = simpanSkor;
-    document.getElementById("btnPapan").onclick = bukaPapan;
-    document.getElementById("btnUtama").onclick = tutupPapan;
-    document.getElementById("kembaliUtama").onclick = tutupPapan;
-    
-    // Lukis permulaan kosong
-    lukisTanah(); lukisDino();
+    tetapkanSaiz(); ikatKawalan(); lukisLatar(); lukisDino();
     </script>
 </body>
 </html>
